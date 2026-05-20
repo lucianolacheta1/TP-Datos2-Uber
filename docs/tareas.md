@@ -104,11 +104,12 @@
 ## Fase 2 — Setup del proyecto Python
 
 ### 2.1 Repositorio Git
-- [ ] Hacer `git init` en `C:\Users\lucia\UADE\datos2\TPUber\` (si no está ya)
-- [ ] Crear `.gitignore` incluyendo: `.env`, `__pycache__/`, `*.pyc`, `venv/`, `*.zip` (secure connect bundles), `.idea/`, `.vscode/`
-- [ ] Conectar al remoto: `git remote add origin https://github.com/lucianolacheta1/TP-Datos2-Uber.git`
-- [ ] Primer commit con la documentación: `git add . && git commit -m "agregar documentación inicial del proyecto"`
-- [ ] Push inicial: `git push -u origin main`
+- [x] `git init -b main` en `C:\Users\lucia\UADE\datos2\TPUber\`
+- [x] Crear `.gitignore` (excluye `Uber/`, `*.vtt`, `.env`, `*.zip`, `venv/`, `__pycache__/`, etc.)
+- [x] Crear `README.md` (portada del repo apuntando a `CLAUDE.md` y `docs/`)
+- [x] Conectar al remoto: `git remote add origin https://github.com/lucianolacheta1/TP-Datos2-Uber.git`
+- [x] Primer commit con la documentación (8 archivos, 1742 líneas)
+- [x] Push inicial: `git push --force -u origin main` (force-push sobrescribió el commit inicial trivial de GitHub)
 - [ ] Invitar a los compañeros del grupo como colaboradores del repo (Settings → Collaborators en GitHub)
 
 ### 2.2 Estructura del proyecto
