@@ -29,20 +29,29 @@ El TP requiere integrar **1 base relacional + 3 NoSQL como mínimo** demostrando
 ## Estructura del repositorio
 
 ```
-TPUber/
+TP-Datos2-Uber/                                ← raíz del repo (carpeta tras hacer git clone)
 ├── CLAUDE.md                                  ← este archivo (memoria del proyecto)
+├── README.md                                  ← portada del repo
+├── .gitignore                                 ← exclusiones del versionado
 ├── docs/
 │   ├── diseno.md                              ← diseño técnico completo (LEER PRIMERO)
 │   ├── justificacion-der.md                   ← justificación de cambios al DER (para el profesor)
 │   ├── decisiones.md                          ← ADRs: cada decisión con su rationale
 │   ├── presentacion.md                        ← plan de defensa del TP (guion + slides + checklist)
 │   └── tareas.md                              ← roadmap del proyecto (hecho / en curso / pendiente)
-├── Uber/                                      ← material original del enunciado (NO MODIFICAR)
-│   ├── Uber.pdf                               ← DER del sistema
-│   └── Uber.docx                              ← requerimientos + 7 casos de uso
-├── Meeting with MOSQUERA...vtt                ← transcripción del video del profesor
 └── (src/  — la carpeta de código vendrá cuando empiece la implementación)
 ```
+
+**Archivos que NO están versionados pero pueden estar en tu copia local** (descargados aparte del campus virtual):
+
+```
+Uber/                                          ← material original del enunciado
+├── Uber.pdf                                   ← DER del sistema
+└── Uber.docx                                  ← requerimientos + 7 casos de uso
+Meeting with MOSQUERA...vtt                    ← transcripción del video del profesor
+```
+
+> Si clonás el repo, esos archivos no aparecen. Los podés conseguir del campus virtual de la facultad y colocarlos en la raíz del proyecto si los necesitás como referencia. El `.gitignore` los excluye automáticamente.
 
 ## Por dónde empezar a leer
 
@@ -78,7 +87,8 @@ Si entrás nuevo al proyecto, leé en este orden:
 
 ## Reglas con el material original
 
-- **Nunca modificar** archivos en `Uber/` ni la transcripción `.vtt`. Son entrada inmutable.
+- El material original (`Uber/*.pdf`, `Uber/*.docx`, transcripción `.vtt`) **no se versiona en el repo** — vive en cada copia local porque cada integrante puede descargarlo del campus virtual.
+- Si tenés esa copia local, **nunca modifiques** esos archivos. Son entrada inmutable.
 - Si hay que extraer info, copiar a `docs/` y trabajar sobre la copia.
 
 ## Convenciones

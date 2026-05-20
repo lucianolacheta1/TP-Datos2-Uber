@@ -386,10 +386,11 @@ def reconciliar_neo4j_desde_mongo():
 ### 7.1 Árbol de carpetas
 
 ```
-TPUber/
+TP-Datos2-Uber/                    ◄── raíz del repo (al clonar)
 ├── CLAUDE.md
-├── docs/                          (documentación)
-├── Uber/                          (material original — NO TOCAR)
+├── README.md
+├── .gitignore
+├── docs/                          (documentación versionada)
 │
 ├── src/                           ◄── código de la aplicación
 │   ├── __init__.py
@@ -459,10 +460,10 @@ TPUber/
 ├── tests/                         (opcional, ad-hoc)
 ├── requirements.txt
 ├── .env.example                   ◄── plantilla (sí va a git)
-├── .env                           ◄── credenciales reales (gitignored)
-├── .gitignore
-└── README.md
+└── .env                           ◄── credenciales reales (gitignored)
 ```
+
+> **Nota:** el material original del enunciado (`Uber/*.pdf`, `Uber/*.docx`, transcripción `.vtt`) **no está versionado en el repo** — si lo tenés localmente, lo descargás del campus virtual. El `.gitignore` lo excluye automáticamente. Ver `CLAUDE.md` para detalles.
 
 ### 7.2 Arquitectura en 5 capas
 

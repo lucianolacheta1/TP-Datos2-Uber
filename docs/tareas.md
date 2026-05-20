@@ -104,7 +104,7 @@
 ## Fase 2 — Setup del proyecto Python
 
 ### 2.1 Repositorio Git
-- [x] `git init -b main` en `C:\Users\lucia\UADE\datos2\TPUber\`
+- [x] `git init -b main` en la raíz del proyecto local
 - [x] Crear `.gitignore` (excluye `Uber/`, `*.vtt`, `.env`, `*.zip`, `venv/`, `__pycache__/`, etc.)
 - [x] Crear `README.md` (portada del repo apuntando a `CLAUDE.md` y `docs/`)
 - [x] Conectar al remoto: `git remote add origin https://github.com/lucianolacheta1/TP-Datos2-Uber.git`
