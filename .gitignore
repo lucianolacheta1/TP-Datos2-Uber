@@ -1,0 +1,59 @@
+# ============================================
+# Material original del enunciado (no versionar)
+# ============================================
+Uber/
+Meeting*.vtt
+*.vtt
+
+# ============================================
+# Credenciales y secrets
+# ============================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ============================================
+# Secure connect bundles (Cassandra/Astra)
+# ============================================
+secure-connect-*.zip
+*.zip
+
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# ============================================
+# Editores e IDEs
+# ============================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ============================================
+# Logs y archivos temporales
+# ============================================
+*.log
+logs/
+tmp/
+temp/
