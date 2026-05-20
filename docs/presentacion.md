@@ -85,7 +85,7 @@ G6: "Se finaliza el viaje"
 Q6: ✅ Mongo `viajes` actualizado: estado=FINALIZADO, ts_fin
     ✅ Cassandra `ultima_actividad_conductor` actualizada
     ✅ Cassandra `viajes_finalizados_por_dia` con entrada nueva
-    ✅ Neo4j: MATCH (u)-[r:VIAJÓ_CON]->(c) RETURN r.cantidad_viajes = 1
+    ✅ Neo4j: MATCH (u)-[r:VIAJO_CON]->(c) RETURN r.cantidad_viajes = 1
 💡 "Una sola acción del usuario disparó escritura en 4 bases simultáneas"
 
 G7: "Se procesa el pago"

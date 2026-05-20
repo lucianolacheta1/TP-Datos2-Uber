@@ -91,7 +91,7 @@ Las siguientes son decisiones de **modelado físico**: el DER conceptual se mate
 **Justificación:**
 - El caso de uso 5 ("pasajero-conductor con más de 1 viaje en común") es un problema clásico de **relaciones N:M con peso**.
 - En Postgres se resuelve con `GROUP BY ... HAVING COUNT(*) > 1`, que tiene complejidad O(viajes).
-- En Neo4j se modela como una arista `[:VIAJÓ_CON]` con propiedad `cantidad_viajes`, lectura en O(1).
+- En Neo4j se modela como una arista `[:VIAJO_CON]` con propiedad `cantidad_viajes`, lectura en O(1).
 - Los vehículos también se modelan como nodos para resolver el caso de uso 6 (filtro por marca + patrón en placa).
 
 ### M4 — Sesiones, posiciones actuales y caché en **Redis**

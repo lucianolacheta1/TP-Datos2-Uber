@@ -237,7 +237,7 @@ CREATE TABLE viajes_finalizados_por_dia (
 
 // Relaciones
 (:Conductor)-[:MANEJA]->(:Vehiculo)
-(:Usuario)-[:VIAJÓ_CON {
+(:Usuario)-[:VIAJO_CON {
     cantidad_viajes: 3,
     ultimo_viaje_ts: datetime("...")
 }]->(:Conductor)
@@ -271,7 +271,7 @@ CREATE INDEX vehiculo_marca    IF NOT EXISTS FOR (v:Vehiculo)  ON (v.marca);
 | 2 | Método de pago menos usado | **Mongo** | `aggregate([{$group:{_id:"$metodo_pago", c:{$sum:1}}}, {$sort:{c:1}}, {$limit:1}])` |
 | 3 | Conductores inactivos último mes | **Cassandra** | `SELECT conductor_id FROM ultima_actividad_conductor WHERE ultimo_viaje_ts < ?` (con filtro app-side) |
 | 4 | Tiempo promedio viajes | **Cassandra** + **Redis** (cache) | `SELECT AVG(duracion_min) FROM viajes_finalizados_por_dia` (o agregado app-side) |
-| 5 | Pasajero-conductor con >1 viaje | **Neo4j** | `MATCH (u:Usuario)-[r:VIAJÓ_CON]->(c:Conductor) WHERE r.cantidad_viajes > 1 RETURN u, c, r.cantidad_viajes` |
+| 5 | Pasajero-conductor con >1 viaje | **Neo4j** | `MATCH (u:Usuario)-[r:VIAJO_CON]->(c:Conductor) WHERE r.cantidad_viajes > 1 RETURN u, c, r.cantidad_viajes` |
 | 6 | Autos patente "D" + Toyota | **Neo4j** | `MATCH (v:Vehiculo) WHERE v.marca='Toyota' AND v.placa ENDS WITH 'D' RETURN count(v)` |
 | 7 | Reseñas con rating 5 o <2 | **Mongo** | `find({$or:[{rating:5},{rating:{$lt:2}}]})` |
 
@@ -366,7 +366,7 @@ def reconciliar_neo4j_desde_mongo():
         neo4j.run("""
           MERGE (u:Usuario   {id: $u})
           MERGE (c:Conductor {id: $c})
-          MERGE (u)-[r:VIAJÓ_CON]->(c)
+          MERGE (u)-[r:VIAJO_CON]->(c)
           SET r.cantidad_viajes = $n
         """, **par["_id"], n=par["n"])
 ```
@@ -580,7 +580,7 @@ def ejecutar(min_viajes: int = 2) -> list[dict]:
 # src/repositories/grafo_repo.py
 def coincidencias(min_viajes: int) -> list[dict]:
     query = """
-        MATCH (u:Usuario)-[r:VIAJÓ_CON]->(c:Conductor)
+        MATCH (u:Usuario)-[r:VIAJO_CON]->(c:Conductor)
         WHERE r.cantidad_viajes >= $n
         RETURN u.nombre AS pasajero, c.nombre AS conductor,
                r.cantidad_viajes AS viajes
