@@ -113,7 +113,57 @@ Cada operación de negocio toca varias bases (write-through best-effort + reconc
 
 ## Cómo correr el proyecto
 
-> Pendiente — se completará cuando exista la carpeta `src/`.
+> **Pre-requisitos:** Python 3.11+ y Git instalados. Ya tener el `.env` y el bundle de Cassandra (ver `docs/onboarding-equipo.md`).
+
+### Setup inicial (solo una vez)
+
+**1. Clonar el repo y entrar a la carpeta:**
+```bash
+git clone https://github.com/lucianolacheta1/TP-Datos2-Uber.git
+cd TP-Datos2-Uber
+```
+
+**2. Pegar el `.env` recibido por canal privado** en la raíz del repo. Editá la línea `ASTRA_BUNDLE_PATH=` para que apunte al `.zip` en TU máquina.
+
+**3. Crear el venv e instalar dependencias:**
+```bash
+python -m venv venv
+```
+
+Activar el venv:
+- **PowerShell:** `.\venv\Scripts\Activate.ps1` (si da error de execution policy, primero: `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`)
+- **Git Bash:** `source venv/Scripts/activate`
+- **Mac/Linux:** `source venv/bin/activate`
+
+```bash
+pip install -r requirements.txt
+```
+
+### Verificar que las 5 bases responden
+
+```bash
+python -m scripts.check_connections
+```
+
+Esperado: 5/5 `[OK]` y exit code 0. Si alguno falla, ver `docs/onboarding-equipo.md` § "Si algo no funciona".
+
+### Workflow diario
+
+```bash
+cd C:\ruta\a\TP-Datos2-Uber
+.\venv\Scripts\Activate.ps1    # (o source venv/Scripts/activate en bash)
+# trabajar en el código
+python -m scripts.check_connections   # opcional, para verificar antes de codear
+# ...
+```
+
+### Correr la app (cuando exista `src/main.py`)
+
+> Aún no implementado. Va a venir en el Plan 04.
+
+```bash
+python -m src.main
+```
 
 ## Equipo
 

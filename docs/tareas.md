@@ -1,13 +1,32 @@
 # Tareas del proyecto — TP Uber
 
 > Roadmap completo del proyecto. Marcar `[x]` cuando se complete, `[~]` cuando esté en curso, `[ ]` cuando esté pendiente.
-> Última actualización: 2026-05-19
+> Última actualización: 2026-05-26
 
 **Leyenda:**
 - `[x]` ✅ completado
 - `[~]` 🔄 en curso
 - `[ ]` ⬜ pendiente
 - `[?]` ❓ a decidir / dependiente de algo
+
+---
+
+## 📍 Estado actual (TL;DR para nuevos integrantes)
+
+**Lo que ya está hecho (Fases 0 + 1 + 2):**
+- ✅ Diseño completo, 5 documentos en `docs/`, 12 ADRs.
+- ✅ Las **5 bases cloud están creadas y conectándose OK** desde Python (`scripts/check_connections.py` devuelve 5/5).
+- ✅ Esqueleto Python: `src/config.py`, `src/utils/`, los 5 módulos `src/db/`, `scripts/check_connections.py`.
+- ✅ **Invitaciones mandadas a los 4 compañeros** en las 5 plataformas (Neon, Atlas, Astra, Aura, Redis Cloud).
+- ✅ Repo GitHub con toda la documentación y código pusheado.
+
+**En qué estamos ahora:**
+- 🔄 Esperando que los compañeros acepten invitaciones y armen su entorno local siguiendo `docs/onboarding-equipo.md`.
+- ⬜ Próximo paso técnico: **Fase 3 — crear los esquemas (DDL)** en cada base.
+
+**Quién hace qué:**
+- Si sos nuevo en el proyecto → arrancá por `docs/onboarding-equipo.md`.
+- Cuando tu `check_connections.py` devuelva 5/5, ya estás listo para programar.
 
 ---
 
@@ -43,61 +62,58 @@
 
 ---
 
-## Fase 1 — Setup de infraestructura cloud
+## Fase 1 — Setup de infraestructura cloud ✅ COMPLETADA
 
-> Las **credenciales** de cada base deben ir a un archivo `.env` que **no se commitee**. Compartir entre el equipo por canal seguro.
+> Las credenciales de cada base están en `.env` (no commiteado).
+> Para nuevos integrantes: **NO crear cuentas nuevas** — pedirle el `.env` y el bundle de Cassandra a Luciano por canal privado. Ver `docs/onboarding-equipo.md`.
 
-### 1.1 PostgreSQL en Neon (`neon.tech`)
-- [ ] Crear cuenta en https://neon.tech (con GitHub o email)
-- [ ] Crear nuevo proyecto: nombre `tp-uber` (o similar)
-- [ ] Elegir región más cercana (probablemente `us-east-2` o `sa-east-1` si está disponible)
-- [ ] Anotar el **connection string** (formato `postgresql://user:pass@host/db`)
-- [ ] Guardar en `.env` como `POSTGRES_URL=...`
-- [ ] Probar conexión con `psql` o desde Python con `psycopg`
-- [ ] Habilitar branching si querés tener ramas dev/prod (opcional)
+### 1.1 PostgreSQL en Neon — ✅
+- [x] Cuenta y proyecto creados en https://neon.tech
+- [x] Región: `sa-east-1` (São Paulo)
+- [x] Connection string guardado en `.env` como `POSTGRES_URL`
+- [x] Conexión probada desde Python con `psycopg` → OK
+- [x] **Invitaciones mandadas a los 4 compañeros** (rol Admin) desde Organization → People → Invite member
 
-### 1.2 MongoDB en Atlas (`mongodb.com/cloud/atlas`)
-- [ ] Crear cuenta en https://www.mongodb.com/cloud/atlas
-- [ ] Crear nueva organización + proyecto
-- [ ] Crear cluster **M0 (Free)** — elegir provider (AWS recomendado) y región
-- [ ] En **Database Access**: crear usuario con password (anotar)
-- [ ] En **Network Access**: agregar IP `0.0.0.0/0` (allow from anywhere) — solo para desarrollo
-- [ ] Obtener el connection string del botón "Connect" → "Drivers" → Python
-- [ ] Guardar en `.env` como `MONGO_URL=mongodb+srv://...`
-- [ ] Probar conexión con MongoDB Compass (desktop client) o desde Python con `pymongo`
+### 1.2 MongoDB en Atlas — ✅
+- [x] Cuenta + organización + proyecto creados en https://www.mongodb.com/cloud/atlas
+- [x] Cluster **M0 Free** `UADE-ID2-UBER` activo
+- [x] Usuario `llacheta` con password creado
+- [x] Network Access con `0.0.0.0/0` para desarrollo
+- [x] Connection string guardado en `.env` como `MONGO_URL`
+- [x] Conexión probada desde Python con `pymongo` → OK
+- [x] **Invitaciones mandadas a los 4 compañeros** (rol Project Owner) desde Access Manager → Project Access
 
-### 1.3 Cassandra en DataStax Astra (`astra.datastax.com`)
-- [ ] Crear cuenta en https://astra.datastax.com (con GitHub o email)
-- [ ] Crear nueva **Database** → tipo **Serverless (Vector)** o **Serverless**
-- [ ] Asignar nombre `tp-uber` y región
-- [ ] Crear **keyspace** llamado `uber_tp` (o el nombre que prefieran)
-- [ ] Generar un **Application Token** desde "Settings → Tokens" con rol `Database Administrator`
-- [ ] Anotar `Client ID`, `Client Secret` y `Token`
-- [ ] Descargar el **Secure Connect Bundle** (.zip) — guardarlo en una carpeta segura
-- [ ] Guardar en `.env` las 3 credenciales + el path al bundle
-- [ ] Probar conexión con CQL Console (en la UI de Astra) o desde Python con `cassandra-driver`
+### 1.3 Cassandra en DataStax Astra — ✅
+- [x] Cuenta creada en https://astra.datastax.com
+- [x] Database serverless `UADE_ID2_UBER` activa
+- [x] Keyspace `uber_tp` creado
+- [x] Application Token generado con rol `Organization Administrator + Database Administrator`
+- [x] Credenciales guardadas en `.env` (`ASTRA_CLIENT_ID`, `ASTRA_CLIENT_SECRET`, `ASTRA_TOKEN`)
+- [x] Secure Connect Bundle descargado y guardado fuera del repo
+- [x] Path al bundle guardado en `.env` como `ASTRA_BUNDLE_PATH`
+- [x] Conexión probada desde Python con `cassandra-driver` → OK
+- [x] **Invitaciones mandadas a los 4 compañeros** (Org + DB Admin) desde Organization Settings → User Management
 
-### 1.4 Neo4j en Aura (`console.neo4j.io`)
-- [ ] Crear cuenta en https://console.neo4j.io
-- [ ] Crear nueva instancia **AuraDB Free** (1 DB, 200k nodos, gratis para siempre)
-- [ ] **⚠️ IMPORTANTE:** copiar el password apenas se genera; **se muestra una sola vez**. Guardarlo de inmediato.
-- [ ] Anotar el **URI** (formato `neo4j+s://xxxxxxxx.databases.neo4j.io`)
-- [ ] Usuario por defecto: `neo4j`
-- [ ] Guardar en `.env` como `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`
-- [ ] Probar conexión con Neo4j Browser (link en la UI) ejecutando `RETURN 1`
-- [ ] Probar conexión desde Python con el driver `neo4j`
+### 1.4 Neo4j en Aura — ✅
+- [x] Cuenta creada en https://console.neo4j.io
+- [x] Instancia **AuraDB** creada (instance ID: `1b29ebc4`)
+- [x] Password copiado y guardado en `.env` como `NEO4J_PASSWORD`
+- [x] URI guardado en `.env` como `NEO4J_URI=neo4j+s://1b29ebc4.databases.neo4j.io`
+- [x] **⚠️ Importante:** el `NEO4J_USER` es el **instance ID** (`1b29ebc4`), NO la string `neo4j` como era antes. Aura cambió su esquema reciente.
+- [x] Conexión probada desde Python con driver `neo4j` → OK
+- [x] **Invitaciones mandadas a los 4 compañeros** (3 quedaron como Viewer, alcanza para visualizar; el acceso de escritura va por el `.env`)
 
-### 1.5 Redis en Redis Cloud (`redis.com`) o Upstash (`upstash.com`)
-- [ ] Elegir proveedor: **Redis Cloud** (30 MB free) o **Upstash** (10 MB free, más simple)
-- [ ] Crear cuenta
-- [ ] Crear **Database** free tier
-- [ ] Anotar `host`, `port`, `password`
-- [ ] Guardar en `.env` como `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
-- [ ] Probar conexión con `redis-cli` o desde Python con `redis`
+### 1.5 Redis en Redis Cloud — ✅
+- [x] Cuenta creada en https://app.redislabs.com
+- [x] Database free tier `UADE-ID2-UBER` activa
+- [x] Host, port, password guardados en `.env` (`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`)
+- [x] Conexión probada desde Python con `redis-py` → OK
+- [x] **Invitaciones mandadas a los 4 compañeros** (rol Owner) → 5/5 aceptaron desde Access Management → Team
 
-### 1.6 Verificación end-to-end
-- [ ] Crear script `check_connections.py` que abra una conexión a cada base e imprima `OK` o el error.
-- [ ] Asegurar que las 5 bases respondan desde la máquina de cada integrante del grupo.
+### 1.6 Verificación end-to-end — ✅
+- [x] `scripts/check_connections.py` implementado
+- [x] Las 5 bases responden OK desde Python en la máquina principal (Luciano)
+- [ ] Que los 4 compañeros corran el check en su máquina y confirmen 5/5 OK (esperando)
 
 ---
 
@@ -112,34 +128,29 @@
 - [x] Push inicial: `git push --force -u origin main` (force-push sobrescribió el commit inicial trivial de GitHub)
 - [ ] Invitar a los compañeros del grupo como colaboradores del repo (Settings → Collaborators en GitHub)
 
-### 2.2 Estructura del proyecto
-- [ ] Definir estructura de carpetas (`src/`, `tests/`, `scripts/`, `config/`, etc.) — ver `docs/diseno.md` §7
-- [ ] Crear `requirements.txt` con las dependencias:
-  - `psycopg[binary]`
-  - `pymongo`
-  - `cassandra-driver`
-  - `neo4j`
-  - `redis`
-  - `python-dotenv`
-  - `bcrypt`
-- [ ] Crear archivo `.env.example` (con las claves vacías, para el equipo)
+### 2.2 Estructura del proyecto — ✅
+- [x] Carpetas creadas: `src/`, `src/db/`, `src/utils/`, `scripts/`, `tests/` (todas con `__init__.py`)
+- [x] `requirements.txt` creado con: `psycopg[binary]`, `pymongo`, `cassandra-driver`, `pyasyncore` (necesario para Python 3.12+), `neo4j`, `redis`, `python-dotenv`, `bcrypt`, `pytest`
+- [x] `.env.example` creado como plantilla del `.env` real (que está gitignored)
 
-### 2.3 Entorno virtual y dependencias
-- [ ] Crear virtualenv: `python -m venv venv`
-- [ ] Activar venv: `source venv/Scripts/activate` (Windows) o `source venv/bin/activate` (Linux/Mac)
-- [ ] Instalar dependencias: `pip install -r requirements.txt`
-- [ ] Verificar que `pip list` muestre todo
+### 2.3 Entorno virtual y dependencias — ✅
+- [x] `python -m venv venv` creado
+- [x] Activar venv: `.\venv\Scripts\Activate.ps1` (PS) o `source venv/Scripts/activate` (Git Bash)
+- [x] `pip install -r requirements.txt` ejecutado, todas las dependencias instaladas
+- [x] `pip list` muestra los 9 paquetes esperados
 
-### 2.4 Capa de configuración
-- [ ] Implementar `src/config.py` que cargue variables desde `.env` con `python-dotenv`
-- [ ] Validar al arrancar que todas las variables críticas estén presentes
+### 2.4 Capa de configuración — ✅
+- [x] `src/config.py` implementado con `python-dotenv` y dataclass `Settings`
+- [x] Función `validate()` que verifica que las variables críticas estén presentes
+- [x] `src/utils/logger.py` y `src/utils/errors.py` también implementados
 
-### 2.5 Conexiones a las bases
-- [ ] Implementar `src/db/postgres.py` (singleton de conexión `psycopg`)
-- [ ] Implementar `src/db/mongo.py` (cliente `pymongo`)
-- [ ] Implementar `src/db/cassandra.py` (cluster `cassandra-driver` con bundle)
-- [ ] Implementar `src/db/neo4j_db.py` (driver `neo4j`)
-- [ ] Implementar `src/db/redis_db.py` (cliente `redis`)
+### 2.5 Conexiones a las bases — ✅
+- [x] `src/db/postgres.py` con `get_conn()` singleton + `check()` → OK
+- [x] `src/db/mongo.py` con `get_client()` + `get_db()` + `check()` → OK
+- [x] `src/db/cassandra.py` con `get_session()` + `check()` → OK
+- [x] `src/db/neo4j_db.py` con `get_driver()` + `check()` → OK
+- [x] `src/db/redis_db.py` con `get_client()` + `check()` → OK
+- [x] `scripts/check_connections.py` corre las 5 verificaciones, devuelve 5/5 OK
 
 ---
 
@@ -279,5 +290,14 @@
 > Acá podemos ir anotando bloqueos, dudas pendientes, items a discutir en próximas reuniones.
 
 - **2026-05-19:** Documentación inicial completada — 6 documentos: `CLAUDE.md`, `docs/diseno.md`, `docs/justificacion-der.md`, `docs/decisiones.md` (12 ADRs), `docs/presentacion.md`, `docs/tareas.md`. Próximo paso: arrancar **Fase 1** (creación de cuentas en las 5 plataformas cloud).
+- **2026-05-26:** Fases 1 y 2 completadas:
+  - Las 5 cuentas cloud creadas (Neon, Atlas, Astra, Aura, Redis Cloud) con credenciales en `.env`.
+  - Esqueleto Python listo: `src/config.py`, `src/utils/{logger,errors}.py`, los 5 módulos `src/db/`, y `scripts/check_connections.py`.
+  - `python -m scripts.check_connections` devuelve 5/5 OK desde la máquina principal.
+  - **20 invitaciones mandadas** (4 compañeros × 5 plataformas) — esperando aceptación.
+  - `docs/onboarding-equipo.md` creado para guiar el setup de los nuevos integrantes.
+  - **Quirks documentados:** `pyasyncore` necesario para Python 3.12+; Neo4j Aura ahora usa el instance ID como username (no `neo4j`).
+  - Próximo paso: **Fase 3 — crear los esquemas (DDL)** en cada base.
 - [ ] **Confirmar con el profesor** que está OK usar 5 bases en lugar de 4 (1 relacional + 4 NoSQL en vez de 1+3).
 - [x] Repositorio remoto: https://github.com/lucianolacheta1/TP-Datos2-Uber (decidido 2026-05-19).
+- [ ] **Invitar al equipo como colaboradores del repo en GitHub** (Settings → Collaborators) si queremos que puedan hacer push directo a `main`. Hoy el repo es público, así que pueden clonar sin invitación, pero solo Luciano puede pushear.
