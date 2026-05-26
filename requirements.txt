@@ -1,6 +1,9 @@
 psycopg[binary]==3.2.*
 pymongo==4.10.*
 cassandra-driver==3.29.*
+# pyasyncore: backport del modulo asyncore que cassandra-driver necesita.
+# asyncore fue removido en Python 3.12 — sin esto, cassandra-driver no carga.
+pyasyncore==1.0.*
 neo4j==5.26.*
 redis==5.2.*
 python-dotenv==1.0.*
