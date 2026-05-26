@@ -46,6 +46,30 @@ Las **3 plataformas** abajo te van a llegar invitación por mail. Para que la in
 
 > ⚠️ **NO tenés que crear cuentas en** Neon (Postgres) ni Neo4j Aura. Esas dos plataformas no permiten invitaciones en su tier gratuito. El acceso a esas DBs lo vas a tener vía las credenciales del archivo `.env` (paso 3).
 
+#### Cómo acceder a Neo4j desde la web (sin cuenta de Aura)
+
+Si querés inspeccionar el grafo visualmente:
+
+1. Andá a https://workspace.neo4j.io
+2. Login con cualquier cuenta (Google o email — es independiente de Aura).
+3. Una vez adentro, **"Connect to instance"** → **"Add connection"**.
+4. Pegá:
+   - **Connection URL:** el `NEO4J_URI` del `.env`.
+   - **Username:** el `NEO4J_USER` del `.env` (importante: es el instance ID, NO `neo4j`).
+   - **Password:** el `NEO4J_PASSWORD` del `.env`.
+5. Click **Connect**.
+
+Vas a ver la misma DB que el resto del equipo.
+
+#### Cómo acceder a Postgres (Neon) desde un cliente
+
+Igual que con Neo4j, no necesitás una cuenta de Neon. Usá un cliente local como **DBeaver** (https://dbeaver.io, gratis) o **pgAdmin**:
+
+1. Instalá DBeaver.
+2. Nueva conexión → **PostgreSQL**.
+3. Pegá el `POSTGRES_URL` del `.env` o partilo en sus componentes (host, port, database, user, password).
+4. Conectá.
+
 ---
 
 ## Paso 2 — Aceptar las invitaciones
