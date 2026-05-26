@@ -56,6 +56,8 @@ Las **3 plataformas** abajo te van a llegar invitación por mail. Para que la in
 - Click en **Sign up** → registrate con email **@uade.edu.ar**.
 - Cuando llegues al dashboard, **no crees ninguna instancia** — vas a recibir invitación a la organización del equipo.
 
+> ⚠️ **Nota:** en Aura Free podés quedar invitado como **"Viewer"** (solo lectura desde la UI). Eso NO afecta tu capacidad de trabajar en el TP: cuando corras la app Python o uses Neo4j Workspace con las credenciales del `.env`, tenés acceso **total** (lectura y escritura) a la DB. El rol "Viewer" solo limita lo que podés hacer desde el dashboard de console.neo4j.io.
+
 > 💡 **Alternativa:** si por alguna razón no recibís la invitación de Aura o no podés aceptarla, podés conectarte igual a la DB vía https://workspace.neo4j.io con cualquier cuenta (Google/email) y usando las credenciales del `.env` (paso 3): `NEO4J_URI`, `NEO4J_USER` (es el instance ID, NO `neo4j`) y `NEO4J_PASSWORD`. Te muestra la misma DB.
 
 ---
