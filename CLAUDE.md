@@ -38,6 +38,7 @@ TP-Datos2-Uber/                                ← raíz del repo (carpeta tras 
 │   ├── justificacion-der.md                   ← justificación de cambios al DER (para el profesor)
 │   ├── decisiones.md                          ← ADRs: cada decisión con su rationale
 │   ├── presentacion.md                        ← plan de defensa del TP (guion + slides + checklist)
+│   ├── onboarding-equipo.md                   ← guía rápida para nuevos integrantes del equipo
 │   └── tareas.md                              ← roadmap del proyecto (hecho / en curso / pendiente)
 └── (src/  — la carpeta de código vendrá cuando empiece la implementación)
 ```
