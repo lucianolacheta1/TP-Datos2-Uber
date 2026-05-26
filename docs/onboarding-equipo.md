@@ -44,11 +44,17 @@ Las **3 plataformas** abajo te van a llegar invitación por mail. Para que la in
 - Click en **Sign Up** → registrate con email **@uade.edu.ar**.
 - Cuando llegues al dashboard, **no crees ninguna database** — vas a recibir invitación.
 
-> ⚠️ **NO tenés que crear cuentas en** Neon (Postgres) ni Neo4j Aura. Esas dos plataformas no permiten invitaciones en su tier gratuito. El acceso a esas DBs lo vas a tener vía las credenciales del archivo `.env` (paso 3).
+### 1.4. Neon (PostgreSQL)
 
-#### Cómo acceder a Neo4j desde la web (sin cuenta de Aura)
+- Andá a: https://neon.tech
+- Click en **Sign up** → registrate con email **@uade.edu.ar**.
+- Cuando llegues al dashboard, **no crees ningún proyecto** — vas a recibir invitación a la organización del equipo.
 
-Si querés inspeccionar el grafo visualmente:
+> 💡 **Sobre Neo4j Aura:** dependiendo del plan, puede o no permitir invitarte a la organización. Si Luciano logra invitarte, te llega un mail desde `noreply@neo4j.com` — registrate en https://console.neo4j.io con tu @uade.edu.ar para aceptarla. Si no, vas a poder usar Neo4j vía Neo4j Workspace con las credenciales del `.env` (ver más abajo).
+
+#### Cómo acceder a Neo4j desde la web (si no tenés cuenta en la org de Aura)
+
+Alternativa siempre disponible — sirve incluso si Aura no te dio acceso directo:
 
 1. Andá a https://workspace.neo4j.io
 2. Login con cualquier cuenta (Google o email — es independiente de Aura).
@@ -61,24 +67,17 @@ Si querés inspeccionar el grafo visualmente:
 
 Vas a ver la misma DB que el resto del equipo.
 
-#### Cómo acceder a Postgres (Neon) desde un cliente
-
-Igual que con Neo4j, no necesitás una cuenta de Neon. Usá un cliente local como **DBeaver** (https://dbeaver.io, gratis) o **pgAdmin**:
-
-1. Instalá DBeaver.
-2. Nueva conexión → **PostgreSQL**.
-3. Pegá el `POSTGRES_URL` del `.env` o partilo en sus componentes (host, port, database, user, password).
-4. Conectá.
-
 ---
 
 ## Paso 2 — Aceptar las invitaciones
 
-En los próximos minutos te van a llegar **3 emails** con invitaciones de los siguientes remitentes:
+En los próximos minutos te van a llegar **4-5 emails** con invitaciones (depende de Aura) de los siguientes remitentes:
 
 - MongoDB Atlas: `noreply@mongodb.com`
 - DataStax Astra: `noreply@datastax.com`
 - Redis Cloud: `noreply@redis.com` (o similar)
+- Neon: `no-reply@neon.tech`
+- (opcional) Neo4j Aura: `noreply@neo4j.com`
 
 Para cada uno:
 1. Abrí el mail.
@@ -90,6 +89,8 @@ Una vez aceptadas, vas a ver en tu dashboard de cada plataforma:
 - Atlas: cluster **`UADE-ID2-UBER`**.
 - Astra: database **`UADE_ID2_UBER`** con keyspace `uber_tp`.
 - Redis Cloud: subscription con la database **`UADE-ID2-UBER`**.
+- Neon: organización **`llacheta@uade.edu.ar`** con el proyecto del TP.
+- (si recibiste) Neo4j Aura: organización con la instancia del TP.
 
 ---
 
