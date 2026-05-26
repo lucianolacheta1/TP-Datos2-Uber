@@ -1,0 +1,8 @@
+psycopg[binary]==3.2.*
+pymongo==4.10.*
+cassandra-driver==3.29.*
+neo4j==5.26.*
+redis==5.2.*
+python-dotenv==1.0.*
+bcrypt==4.2.*
+pytest==8.3.*
