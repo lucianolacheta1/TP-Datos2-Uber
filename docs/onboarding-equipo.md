@@ -50,34 +50,25 @@ Las **3 plataformas** abajo te van a llegar invitación por mail. Para que la in
 - Click en **Sign up** → registrate con email **@uade.edu.ar**.
 - Cuando llegues al dashboard, **no crees ningún proyecto** — vas a recibir invitación a la organización del equipo.
 
-> 💡 **Sobre Neo4j Aura:** dependiendo del plan, puede o no permitir invitarte a la organización. Si Luciano logra invitarte, te llega un mail desde `noreply@neo4j.com` — registrate en https://console.neo4j.io con tu @uade.edu.ar para aceptarla. Si no, vas a poder usar Neo4j vía Neo4j Workspace con las credenciales del `.env` (ver más abajo).
+### 1.5. Neo4j Aura
 
-#### Cómo acceder a Neo4j desde la web (si no tenés cuenta en la org de Aura)
+- Andá a: https://console.neo4j.io
+- Click en **Sign up** → registrate con email **@uade.edu.ar**.
+- Cuando llegues al dashboard, **no crees ninguna instancia** — vas a recibir invitación a la organización del equipo.
 
-Alternativa siempre disponible — sirve incluso si Aura no te dio acceso directo:
-
-1. Andá a https://workspace.neo4j.io
-2. Login con cualquier cuenta (Google o email — es independiente de Aura).
-3. Una vez adentro, **"Connect to instance"** → **"Add connection"**.
-4. Pegá:
-   - **Connection URL:** el `NEO4J_URI` del `.env`.
-   - **Username:** el `NEO4J_USER` del `.env` (importante: es el instance ID, NO `neo4j`).
-   - **Password:** el `NEO4J_PASSWORD` del `.env`.
-5. Click **Connect**.
-
-Vas a ver la misma DB que el resto del equipo.
+> 💡 **Alternativa:** si por alguna razón no recibís la invitación de Aura o no podés aceptarla, podés conectarte igual a la DB vía https://workspace.neo4j.io con cualquier cuenta (Google/email) y usando las credenciales del `.env` (paso 3): `NEO4J_URI`, `NEO4J_USER` (es el instance ID, NO `neo4j`) y `NEO4J_PASSWORD`. Te muestra la misma DB.
 
 ---
 
 ## Paso 2 — Aceptar las invitaciones
 
-En los próximos minutos te van a llegar **4-5 emails** con invitaciones (depende de Aura) de los siguientes remitentes:
+En los próximos minutos te van a llegar **5 emails** con invitaciones de los siguientes remitentes:
 
 - MongoDB Atlas: `noreply@mongodb.com`
 - DataStax Astra: `noreply@datastax.com`
 - Redis Cloud: `noreply@redis.com` (o similar)
 - Neon: `no-reply@neon.tech`
-- (opcional) Neo4j Aura: `noreply@neo4j.com`
+- Neo4j Aura: `noreply@neo4j.com`
 
 Para cada uno:
 1. Abrí el mail.
@@ -90,7 +81,7 @@ Una vez aceptadas, vas a ver en tu dashboard de cada plataforma:
 - Astra: database **`UADE_ID2_UBER`** con keyspace `uber_tp`.
 - Redis Cloud: subscription con la database **`UADE-ID2-UBER`**.
 - Neon: organización **`llacheta@uade.edu.ar`** con el proyecto del TP.
-- (si recibiste) Neo4j Aura: organización con la instancia del TP.
+- Neo4j Aura: organización con la instancia del TP.
 
 ---
 
