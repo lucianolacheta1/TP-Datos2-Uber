@@ -39,6 +39,7 @@ TP-Datos2-Uber/                                ← raíz del repo (carpeta tras 
 │   ├── decisiones.md                          ← ADRs: cada decisión con su rationale
 │   ├── presentacion.md                        ← plan de defensa del TP (guion + slides + checklist)
 │   ├── onboarding-equipo.md                   ← guía rápida para nuevos integrantes del equipo
+│   ├── asignaciones-equipo.md                 ← quién hace qué + contratos + starter prompt para AI
 │   └── tareas.md                              ← roadmap del proyecto (hecho / en curso / pendiente)
 └── (src/  — la carpeta de código vendrá cuando empiece la implementación)
 ```
