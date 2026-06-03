@@ -202,8 +202,8 @@
 - [ ] `auth_service.logout(token)` → borra sesión Redis
 - [ ] `auth_service.validate_session(token)` → consulta Redis con TTL
 
-### 4.2 Gestión de vehículos
-- [ ] `vehiculo_service.registrar(conductor_id, placa, marca, modelo, anio, color, tipo)` → escribe Postgres + crea nodo en Neo4j — proyección Neo4j lista en `grafo_repo` (test cubierto); falta la parte Postgres (mselles)
+### 4.2 Gestión de vehículos — ✅
+- [x] `vehiculo_service.registrar(conductor_id, placa, marca, modelo, anio, color, tipo)` → escribe Postgres (SOT) + nodo Vehiculo y relación MANEJA en Neo4j (best-effort) — 3 tests
 
 ### 4.3 Gestión de viajes
 - [ ] `viaje_service.solicitar(usuario_id, conductor_id, origen, destino)` → escribe Mongo con snapshots desde Postgres
