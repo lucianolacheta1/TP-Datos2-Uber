@@ -175,9 +175,9 @@
 - [ ] Crear tabla `ultima_actividad_conductor`
 - [ ] Crear tabla `viajes_finalizados_por_dia`
 
-### 3.4 Neo4j — `init_neo4j.cypher`
-- [ ] Crear constraints UNIQUE en `Usuario.id`, `Conductor.id`, `Vehiculo.id`
-- [ ] Crear índice en `Vehiculo.marca`
+### 3.4 Neo4j — `init_neo4j.cypher` — ✅
+- [x] Crear constraints UNIQUE en `Usuario.id`, `Conductor.id`, `Vehiculo.id`
+- [x] Crear índice en `Vehiculo.marca` (+ `Vehiculo.placa`) — ejecutado y verificado en Aura
 
 ### 3.5 Redis
 - [ ] No hay esquema; documentar en el código las **convenciones de claves** que se van a usar
@@ -203,7 +203,7 @@
 - [ ] `auth_service.validate_session(token)` → consulta Redis con TTL
 
 ### 4.2 Gestión de vehículos
-- [ ] `vehiculo_service.registrar(conductor_id, placa, marca, modelo, anio, color, tipo)` → escribe Postgres + crea nodo en Neo4j
+- [ ] `vehiculo_service.registrar(conductor_id, placa, marca, modelo, anio, color, tipo)` → escribe Postgres + crea nodo en Neo4j — proyección Neo4j lista en `grafo_repo` (test cubierto); falta la parte Postgres (mselles)
 
 ### 4.3 Gestión de viajes
 - [ ] `viaje_service.solicitar(usuario_id, conductor_id, origen, destino)` → escribe Mongo con snapshots desde Postgres
@@ -221,7 +221,7 @@
 - [ ] Simulador de GPS: thread que cada N segundos genera ubicaciones aleatorias para vehículos activos
 
 ### 4.7 Reconciliación
-- [ ] `reconciliacion.sync_neo4j_desde_mongo()` (rebuild aristas)
+- [x] `reconciliacion_service.sync_neo4j_desde_mongo()` (rebuild aristas) — hecho con TDD (3 tests + `outbox`)
 - [ ] `reconciliacion.sync_cassandra_actividad()` (rebuild ultima_actividad_conductor)
 - [ ] Endpoint del menú para correr la reconciliación manualmente
 
@@ -233,8 +233,8 @@
 - [ ] **Caso 2:** Método de pago menos usado → Mongo aggregate
 - [ ] **Caso 3:** Conductores inactivos último mes → Cassandra query + JOIN app-side con Postgres
 - [ ] **Caso 4:** Tiempo promedio viajes → Cassandra agregado + cache Redis
-- [ ] **Caso 5:** Pasajero-conductor con >1 viaje → Neo4j cypher
-- [ ] **Caso 6:** Autos Toyota patente "D" → Neo4j cypher
+- [x] **Caso 5:** Pasajero-conductor con >1 viaje → Neo4j cypher — `grafo_repo` + `caso_05` (3 tests)
+- [x] **Caso 6:** Autos Toyota patente "D" → Neo4j cypher — `grafo_repo` + `caso_06` (3 tests)
 - [ ] **Caso 7:** Reseñas rating 5 o <2 → Mongo find
 
 ---
