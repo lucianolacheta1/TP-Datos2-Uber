@@ -156,24 +156,24 @@
 
 ## Fase 3 — Creación de esquemas (DDL)
 
-### 3.1 PostgreSQL — `init_postgres.sql`
-- [ ] Crear extensión `pgcrypto` para `gen_random_uuid()`
-- [ ] Crear tabla `usuario` con CHECK en `estado`
-- [ ] Crear tabla `conductor` con CHECK en `estado`
-- [ ] Crear tabla `vehiculo` con FK a `conductor`
-- [ ] Crear índices (`idx_vehiculo_conductor`, etc.)
-- [ ] Ejecutar el script desde Python o desde la consola SQL de Neon
+### 3.1 PostgreSQL — `init_postgres.sql` — ✅
+- [x] Crear extensión `pgcrypto` para `gen_random_uuid()`
+- [x] Crear tabla `usuario` con CHECK en `estado`
+- [x] Crear tabla `conductor` con CHECK en `estado`
+- [x] Crear tabla `vehiculo` con FK a `conductor`
+- [x] Crear índices (`idx_vehiculo_conductor`, etc.)
+- [x] Ejecutar el script — aplicado y verificado en Neon (3 tablas)
 
-### 3.2 MongoDB — `init_mongo.py`
-- [ ] Crear índices en `viajes` (`usuario_id`, `conductor_id`, `estado`, `ts_inicio`)
-- [ ] Crear índices en `pagos` (`viaje_id`, `metodo_pago`)
-- [ ] Crear índices en `resenas` (`autor.id`, `destinatario.id`, `tipo`, `rating`)
+### 3.2 MongoDB — `init_mongo.py` — ✅ (aplicado en Atlas, 4 colecciones con índices)
+- [x] Crear índices en `viajes` (`usuario_id`, `conductor_id`, `estado`, `ts_inicio`)
+- [x] Crear índices en `pagos` (`viaje_id`, `metodo_pago`)
+- [x] Crear índices en `resenas` (`autor.id`, `destinatario.id`, `tipo`, `rating`)
 - [ ] Validar esquemas con JSON Schema validators (opcional)
 
-### 3.3 Cassandra — `init_cassandra.cql`
-- [ ] Crear tabla `ubicaciones_por_vehiculo` con PK compuesta `(vehiculo_id, ts)`
-- [ ] Crear tabla `ultima_actividad_conductor`
-- [ ] Crear tabla `viajes_finalizados_por_dia`
+### 3.3 Cassandra — `init_cassandra.cql` — ✅ (aplicado en Astra, keyspace `uber_tp`)
+- [x] Crear tabla `ubicaciones_por_vehiculo` con PK compuesta `(vehiculo_id, ts)`
+- [x] Crear tabla `ultima_actividad_conductor`
+- [x] Crear tabla `viajes_finalizados_por_dia`
 
 ### 3.4 Neo4j — `init_neo4j.cypher`
 - [ ] Crear constraints UNIQUE en `Usuario.id`, `Conductor.id`, `Vehiculo.id`
