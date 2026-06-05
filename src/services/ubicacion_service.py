@@ -24,7 +24,9 @@ def reportar(vehiculo_id: str, lat: float, lon: float,
              viaje_id: str | None = None) -> None:
     """Registra una posición GPS del vehículo en histórico y última posición."""
     vid_uuid = uuid.UUID(vehiculo_id)
-    vj_uuid = uuid.UUID(viaje_id) if viaje_id else None
+    # viaje_id puede venir como ObjectId de Mongo (24 hex); la columna en Cassandra
+    # es UUID. Lo convertimos de forma determinista (rjust a 32 hex), igual que viaje_service.
+    vj_uuid = uuid.UUID(viaje_id.rjust(32, "0")) if viaje_id else None
     ts = datetime.now(UTC)
 
     # 1. SOT: histórico en Cassandra
