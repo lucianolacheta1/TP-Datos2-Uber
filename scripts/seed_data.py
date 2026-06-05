@@ -137,6 +137,15 @@ def _crear_viaje_finalizado(
         {"_id": ObjectId(viaje_id)},
         {"$set": {"ts_fin": fecha_fin}},
     )
+
+    # El caso 3 (conductores inactivos) lee de Cassandra (ultimo_viaje_ts), que
+    # finalizar() setea a "ahora". Backdateamos también ahí para que la fecha
+    # simulada tenga efecto; si no, todos los conductores quedan "activos".
+    import uuid as _uuid
+    from src.repositories import actividad_repo
+    actividad_repo.upsert_ultima(
+        _uuid.UUID(cid), fecha_fin, _uuid.UUID(viaje_id.rjust(32, "0"))
+    )
     return viaje_id
 
 
