@@ -13,7 +13,9 @@ def loop() -> None:
         print("3. Ver outbox (proyecciones fallidas)")
         print("4. Limpiar el outbox")
         print("5. Limpiar TODAS las bases (peligroso)")
-        print("6. Volver")
+        print("6. Iniciar simulador GPS")
+        print("7. Detener simulador GPS")
+        print("8. Volver")
 
         op = input("\nElegí una opción: ").strip()
         if op == "1":
@@ -27,6 +29,10 @@ def loop() -> None:
         elif op == "5":
             _reset_dbs()
         elif op == "6":
+            _iniciar_simulador()
+        elif op == "7":
+            _detener_simulador()
+        elif op == "8":
             return
         else:
             formato.error("Opción inválida.")
@@ -71,6 +77,20 @@ def _limpiar_outbox() -> None:
     if formato.confirmar("¿Seguro que querés limpiar el outbox?"):
         outbox.clear()
         formato.exito("Outbox limpio.")
+    formato.pausa()
+
+
+def _iniciar_simulador() -> None:
+    from scripts.simulador_gps import iniciar_simulador
+    iniciar_simulador()
+    formato.exito("Simulador GPS arrancado en background (cada 2s).")
+    formato.pausa()
+
+
+def _detener_simulador() -> None:
+    from scripts.simulador_gps import detener_simulador
+    detener_simulador()
+    formato.exito("Simulador GPS detenido.")
     formato.pausa()
 
 
