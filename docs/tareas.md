@@ -229,13 +229,13 @@
 
 ## Fase 5 — Implementación de los 7 casos de uso
 
-- [ ] **Caso 1:** Top 3 reseñadores → Mongo aggregate + cache Redis
-- [ ] **Caso 2:** Método de pago menos usado → Mongo aggregate
+- [x] **Caso 1:** Top 3 reseñadores → Mongo aggregate + cache Redis — `caso_01` (4 tests)
+- [x] **Caso 2:** Método de pago menos usado → Mongo aggregate — `caso_02` (2 tests)
 - [x] **Caso 3:** Conductores inactivos último mes → Cassandra query + JOIN app-side con Postgres — `caso_03` (2 tests)
 - [x] **Caso 4:** Tiempo promedio viajes → Cassandra agregado + cache Redis — `caso_04` + `cache_repo` (4 tests)
 - [x] **Caso 5:** Pasajero-conductor con >1 viaje → Neo4j cypher — `grafo_repo` + `caso_05` (3 tests)
 - [x] **Caso 6:** Autos Toyota patente "D" → Neo4j cypher — `grafo_repo` + `caso_06` (3 tests)
-- [ ] **Caso 7:** Reseñas rating 5 o <2 → Mongo find
+- [x] **Caso 7:** Reseñas rating 5 o <2 → Mongo find — `caso_07` (2 tests)
 
 ---
 
