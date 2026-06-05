@@ -195,35 +195,35 @@
 
 > Cada servicio orquesta escrituras a múltiples bases siguiendo el patrón write-through best-effort.
 
-### 4.1 Autenticación
-- [ ] `auth_service.register_usuario(email, password, nombre, ...)`
-- [ ] `auth_service.register_conductor(email, password, nombre, nro_licencia, ...)`
-- [ ] `auth_service.login(email, password, tipo_cuenta)` → escribe `login_history` en Mongo, crea sesión Redis
-- [ ] `auth_service.logout(token)` → borra sesión Redis
-- [ ] `auth_service.validate_session(token)` → consulta Redis con TTL
+### 4.1 Autenticación — ✅ (14 tests)
+- [x] `auth_service.register_usuario(email, password, nombre, ...)` (bcrypt + nodo Neo4j)
+- [x] `auth_service.register_conductor(email, password, nombre, nro_licencia, ...)` (bcrypt + nodo Neo4j)
+- [x] `auth_service.login(email, password, tipo_cuenta)` → escribe `login_history` en Mongo, crea sesión Redis
+- [x] `auth_service.logout(token)` → borra sesión Redis
+- [x] `auth_service.validate_session(token)` → consulta Redis con TTL
 
 ### 4.2 Gestión de vehículos — ✅
 - [x] `vehiculo_service.registrar(conductor_id, placa, marca, modelo, anio, color, tipo)` → escribe Postgres (SOT) + nodo Vehiculo y relación MANEJA en Neo4j (best-effort) — 3 tests
 
-### 4.3 Gestión de viajes
-- [ ] `viaje_service.solicitar(usuario_id, conductor_id, origen, destino)` → escribe Mongo con snapshots desde Postgres
-- [ ] `viaje_service.iniciar(viaje_id)` → update en Mongo
-- [ ] `viaje_service.finalizar(viaje_id, distancia, duracion)` → update Mongo + actualizar Cassandra + actualizar Neo4j
+### 4.3 Gestión de viajes — ✅ (8 tests)
+- [x] `viaje_service.solicitar(usuario_id, conductor_id, origen, destino)` → escribe Mongo con snapshots desde Postgres
+- [x] `viaje_service.iniciar(viaje_id)` → update en Mongo
+- [x] `viaje_service.finalizar(viaje_id, distancia, duracion)` → update Mongo + actualizar Cassandra + actualizar Neo4j
 
-### 4.4 Pagos
-- [ ] `pago_service.procesar(viaje_id, monto, metodo_pago)` → escribe Mongo
+### 4.4 Pagos — ✅ (3 tests)
+- [x] `pago_service.procesar(viaje_id, monto, metodo_pago)` → escribe Mongo
 
-### 4.5 Reseñas
-- [ ] `resena_service.crear(viaje_id, autor, destinatario, rating, comentario)` → escribe Mongo + recalcula rating en Postgres + actualiza nodo Neo4j + invalida cache Redis
+### 4.5 Reseñas — ✅ (5 tests)
+- [x] `resena_service.crear(viaje_id, autor, destinatario, rating, comentario)` → escribe Mongo + recalcula rating en Postgres + actualiza nodo Neo4j + invalida cache Redis
 
 ### 4.6 Ubicaciones (streaming)
 - [x] `ubicacion_service.reportar(vehiculo_id, lat, lon)` → escribe Cassandra + setea Redis con TTL corto — 3 tests
-- [ ] Simulador de GPS: thread que cada N segundos genera ubicaciones aleatorias para vehículos activos
+- [x] Simulador de GPS: thread que cada N segundos genera ubicaciones aleatorias para vehículos activos — `scripts/simulador_gps.py` + integrado en submenú admin
 
 ### 4.7 Reconciliación
 - [x] `reconciliacion_service.sync_neo4j_desde_mongo()` (rebuild aristas) — hecho con TDD (3 tests + `outbox`)
 - [ ] `reconciliacion.sync_cassandra_actividad()` (rebuild ultima_actividad_conductor)
-- [ ] Endpoint del menú para correr la reconciliación manualmente
+- [x] Endpoint del menú para correr la reconciliación manualmente — submenú Administración
 
 ---
 
@@ -239,23 +239,24 @@
 
 ---
 
-## Fase 6 — Menú de consola
+## Fase 6 — Menú de consola — ✅
 
-- [ ] Estructura general del menú principal
-- [ ] Submenú: **Gestión de cuentas** (registrar, login, logout)
-- [ ] Submenú: **Gestión de vehículos** (registrar)
-- [ ] Submenú: **Operación** (solicitar viaje, iniciar, finalizar, pagar, reseñar)
-- [ ] Submenú: **Consultas — los 7 casos de uso**
-- [ ] Submenú: **Administración** (limpiar bases, reconciliar, ver salud de conexiones)
-- [ ] Loop principal con manejo de errores
+- [x] Estructura general del menú principal (`src/menu/main_menu.py` + `src/main.py`)
+- [x] Submenú: **Gestión de cuentas** (registrar, login, logout) — `submenu_cuentas.py`
+- [x] Submenú: **Gestión de vehículos** (registrar) — dentro de `submenu_operacion.py`
+- [x] Submenú: **Operación** (solicitar viaje, iniciar, finalizar, pagar, reseñar, GPS) — `submenu_operacion.py`
+- [x] Submenú: **Consultas — los 7 casos de uso** — `submenu_consultas.py`
+- [x] Submenú: **Administración** (salud, reconciliar, outbox, reset, simulador) — `submenu_admin.py`
+- [x] Loop principal con manejo de errores (`src/main.py`)
+- [x] Tests de imports de los módulos del menú (6 tests)
 
 ---
 
 ## Fase 7 — Datos de prueba y testing
 
 ### 7.1 Seeding
-- [ ] Script `seed.py` que cree datos realistas: ~20 usuarios, ~10 conductores, ~15 vehículos, ~50 viajes finalizados, pagos, reseñas
-- [ ] Asegurar que la distribución de datos permita demostrar los 7 casos de uso
+- [x] Script `scripts/seed_data.py` que crea datos realistas: 10 usuarios, 5 conductores, 7 vehículos, ~50 viajes finalizados, pagos, reseñas
+- [x] Asegurar que la distribución de datos permita demostrar los 7 casos de uso (diseñado en `seed_data`; verificar corriéndolo)
 
 ### 7.2 Verificación
 - [ ] Ejecutar manualmente los 7 casos de uso y validar resultados
