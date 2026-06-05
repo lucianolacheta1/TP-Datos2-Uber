@@ -217,7 +217,7 @@
 - [ ] `resena_service.crear(viaje_id, autor, destinatario, rating, comentario)` → escribe Mongo + recalcula rating en Postgres + actualiza nodo Neo4j + invalida cache Redis
 
 ### 4.6 Ubicaciones (streaming)
-- [ ] `ubicacion_service.reportar(vehiculo_id, lat, lon)` → escribe Cassandra + setea Redis con TTL corto
+- [x] `ubicacion_service.reportar(vehiculo_id, lat, lon)` → escribe Cassandra + setea Redis con TTL corto — 3 tests
 - [ ] Simulador de GPS: thread que cada N segundos genera ubicaciones aleatorias para vehículos activos
 
 ### 4.7 Reconciliación
@@ -231,8 +231,8 @@
 
 - [ ] **Caso 1:** Top 3 reseñadores → Mongo aggregate + cache Redis
 - [ ] **Caso 2:** Método de pago menos usado → Mongo aggregate
-- [ ] **Caso 3:** Conductores inactivos último mes → Cassandra query + JOIN app-side con Postgres
-- [ ] **Caso 4:** Tiempo promedio viajes → Cassandra agregado + cache Redis
+- [x] **Caso 3:** Conductores inactivos último mes → Cassandra query + JOIN app-side con Postgres — `caso_03` (2 tests)
+- [x] **Caso 4:** Tiempo promedio viajes → Cassandra agregado + cache Redis — `caso_04` + `cache_repo` (4 tests)
 - [x] **Caso 5:** Pasajero-conductor con >1 viaje → Neo4j cypher — `grafo_repo` + `caso_05` (3 tests)
 - [x] **Caso 6:** Autos Toyota patente "D" → Neo4j cypher — `grafo_repo` + `caso_06` (3 tests)
 - [ ] **Caso 7:** Reseñas rating 5 o <2 → Mongo find
