@@ -1,8 +1,14 @@
 """Submenu de administracion: health check, reconciliacion, outbox, reset."""
+import threading
+
 from src.db import postgres, mongo, cassandra, neo4j_db, redis_db
 from src.services import reconciliacion_service
 from src.utils import outbox
 from src.menu import formato
+
+# Estado del simulador GPS (per-vehiculo, corre en un hilo controlado por un Event)
+_sim_thread: threading.Thread | None = None
+_sim_event = threading.Event()
 
 
 def loop() -> None:
@@ -81,15 +87,32 @@ def _limpiar_outbox() -> None:
 
 
 def _iniciar_simulador() -> None:
-    from scripts.simulador_gps import iniciar_simulador
-    iniciar_simulador()
-    formato.exito("Simulador GPS arrancado en background (cada 2s).")
+    global _sim_thread
+    if _sim_event.is_set():
+        formato.error("El simulador ya está corriendo.")
+        formato.pausa()
+        return
+    vehiculo_id = formato.pedir_input("ID del vehículo a simular")
+    from scripts import simulador_gps
+    _sim_event.set()
+    _sim_thread = threading.Thread(
+        target=simulador_gps.correr,
+        args=(vehiculo_id, 2, _sim_event),
+        daemon=True, name="SimuladorGPS",
+    )
+    _sim_thread.start()
+    formato.exito(f"Simulador GPS arrancado para {vehiculo_id} (cada 2s).")
     formato.pausa()
 
 
 def _detener_simulador() -> None:
-    from scripts.simulador_gps import detener_simulador
-    detener_simulador()
+    if not _sim_event.is_set():
+        formato.error("El simulador no está corriendo.")
+        formato.pausa()
+        return
+    _sim_event.clear()
+    if _sim_thread is not None:
+        _sim_thread.join(timeout=5)
     formato.exito("Simulador GPS detenido.")
     formato.pausa()
 
