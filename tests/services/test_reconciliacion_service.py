@@ -2,10 +2,6 @@
 import pytest
 
 
-@pytest.mark.skip(
-    reason="Depende de auth_service/vehiculo_service/viaje_service (otros duenos), "
-           "aun no implementados. Quitar el skip cuando existan."
-)
 def test_sync_neo4j_desde_mongo_reconstruye_aristas(postgres_clean, mongo_clean, cassandra_clean, neo4j_clean, redis_clean):
     """Después de borrar las aristas en Neo4j, sync_neo4j_desde_mongo las recrea."""
     from src.services import auth_service, vehiculo_service, viaje_service
