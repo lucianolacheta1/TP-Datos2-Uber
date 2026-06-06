@@ -59,3 +59,10 @@ outbox.log
 logs/
 tmp/
 temp/
+
+# ============================================
+# Material interno del equipo (no es parte de la entrega de codigo)
+# Vive en una carpeta local aparte, fuera del repo.
+# ============================================
+docs/
+CLAUDE.md
