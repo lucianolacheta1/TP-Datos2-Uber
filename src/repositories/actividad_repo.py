@@ -3,7 +3,7 @@
 Mantiene ultima_actividad_conductor (para caso 3) y
 viajes_finalizados_por_dia (para caso 4).
 """
-from datetime import datetime, date
+from datetime import datetime, date, UTC
 from uuid import UUID
 from src.db.cassandra import get_session
 
@@ -36,17 +36,30 @@ def get_ultima(conductor_id: UUID) -> dict | None:
 def conductores_activos_desde(fecha_limite: datetime) -> list[UUID]:
     """Devuelve los conductor_ids con ultimo_viaje_ts >= fecha_limite.
 
-    OJO: usa ALLOW FILTERING porque no hay índice secundario en ultimo_viaje_ts.
-    Para el TP es aceptable; en producción se usaría una tabla denormalizada.
+    Modelo: ultima_actividad_conductor tiene UNA fila por conductor
+    (PRIMARY KEY = conductor_id), o sea es una tabla-dimensión chica.
+    La leemos completa (SELECT sin WHERE, una lectura legítima) y filtramos
+    por fecha en la app.
+
+    NO usamos ALLOW FILTERING: ese es el anti-patrón de Cassandra (obligar al
+    cluster a filtrar server-side por una columna que no es parte de la clave de
+    partición/clustering, lo que dispara un full-scan no acotado). Acá el filtro
+    por fecha corre del lado de la app sobre un conjunto chico y conocido.
     """
-    cql = """
-        SELECT conductor_id, ultimo_viaje_ts
-        FROM ultima_actividad_conductor
-        WHERE ultimo_viaje_ts >= %s
-        ALLOW FILTERING
-    """
-    rows = get_session().execute(cql, (fecha_limite,))
-    return [r.conductor_id for r in rows]
+    cql = "SELECT conductor_id, ultimo_viaje_ts FROM ultima_actividad_conductor"
+    rows = get_session().execute(cql)
+    activos: list[UUID] = []
+    for r in rows:
+        ts = r.ultimo_viaje_ts
+        if ts is None:
+            continue
+        # El driver de Cassandra devuelve timestamps naive (en UTC); fecha_limite
+        # viene tz-aware. Normalizamos a UTC-aware para poder compararlos.
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=UTC)
+        if ts >= fecha_limite:
+            activos.append(r.conductor_id)
+    return activos
 
 
 def insertar_viaje_finalizado(dia: date, viaje_id: UUID, conductor_id: UUID,
