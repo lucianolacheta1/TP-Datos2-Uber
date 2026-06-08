@@ -45,7 +45,7 @@ def reset_redis():
 def main() -> int:
     validate()
 
-    print("⚠️  ATENCIÓN: este script va a borrar TODOS los datos de las 5 bases:")
+    print("ATENCION: este script va a borrar TODOS los datos de las 5 bases:")
     print(f"   Postgres ({settings.POSTGRES_URL[:40]}...)")
     print(f"   Mongo    ({settings.MONGO_URL[:40]}...)")
     print(f"   Cassandra keyspace: {settings.ASTRA_KEYSPACE}")
