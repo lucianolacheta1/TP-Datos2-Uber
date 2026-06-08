@@ -1,11 +1,12 @@
 """Seed de datos realista para la demo y testing manual.
 
-Genera un dataset coherente que cubre los 7 casos de uso del enunciado:
+Dataset DETERMINISTA que cubre los 7 casos con resultados EXACTOS y documentables
+(sin azar en lo que afecta a cada caso):
 - 10 usuarios, 5 conductores, 7 vehículos.
-- ~50 viajes finalizados (con coincidencias específicas para el caso 5).
-- ~50 pagos (distribución de métodos para el caso 2).
-- ~100 reseñas (ratings distribuidos para el caso 7, autores variados para el caso 1).
-- Distribución temporal para el caso 3 (algunos conductores inactivos).
+- 16 viajes finalizados (parejas controladas para el caso 5).
+- 16 pagos (9 TARJETA / 5 EFECTIVO / 2 BILLETERA para el caso 2).
+- 32 reseñas (ratings fijos para el caso 7, autores controlados para el caso 1).
+- Distribución temporal fija para el caso 3 (Carolina y Roberto inactivos).
 
 Uso:
     python -m scripts.seed_data
@@ -68,6 +69,33 @@ COMENTARIOS_5 = ["Excelente viaje", "Muy amable y puntual", "10/10 lo recomiendo
 COMENTARIOS_4 = ["Buen viaje", "Todo bien", "Sin novedades", "Cumplió", "Conforme"]
 COMENTARIOS_3 = ["Aceptable", "Normal", "Ni bueno ni malo"]
 COMENTARIOS_1 = ["Muy mal trato", "Llegó tarde y de mal humor", "No vuelvo a usarlo"]
+
+
+# ---- plan determinista del dataset (constantes de modulo, testeable sin DB) ----
+
+# (idx_usuario, idx_conductor, dias_atras). Pensado para que los 7 casos den
+# resultados EXACTOS y documentables. Ver el detalle del diseno en main().
+PLAN_VIAJES: list[tuple[int, int, int]] = [
+    (0, 0, 2), (0, 0, 5), (0, 0, 8), (0, 0, 11),   # Juan   <-> Ana Gomez (x4)
+    (1, 1, 3), (1, 1, 6), (1, 1, 9),               # Maria  <-> Luis      (x3)
+    (2, 2, 4), (2, 2, 7),                          # Carlos <-> Beatriz   (x2)
+    (3, 0, 1),    # Ana Rodriguez <-> Ana Gomez
+    (4, 1, 2),    # Pedro         <-> Luis
+    (5, 2, 3),    # Laura         <-> Beatriz
+    (6, 0, 5),    # Diego         <-> Ana Gomez
+    (7, 1, 6),    # Sofia         <-> Luis
+    (8, 2, 8),    # Martin        <-> Beatriz
+    (9, 4, 60),   # Valentina     <-> Carolina (viejo) -> caso 3 inactivos
+]
+# Duraciones alternadas 20/24 -> promedio EXACTO 22.00 min (caso 4).
+DURACIONES = [20 if i % 2 == 0 else 24 for i in range(len(PLAN_VIAJES))]
+DISTANCIAS = [round(8.0 + (i % 5) * 2.5, 1) for i in range(len(PLAN_VIAJES))]
+# Pagos: BILLETERA_VIRTUAL es el menos usado, 2 vs 5 vs 9 (caso 2).
+METODOS = (["TARJETA"] * 9 + ["EFECTIVO"] * 5 + ["BILLETERA_VIRTUAL"] * 2)[:len(PLAN_VIAJES)]
+# Ratings fijos: 6 resenas con rating 5 y 4 con rating 1 (caso 7).
+# Por viaje hay una resena U_A_C (RATING_USER) y una C_A_U (RATING_COND).
+RATING_USER = [5, 5, 5, 1, 1, 4, 3, 4, 3, 4, 3, 4, 3, 4, 3, 4]
+RATING_COND = [4, 3, 5, 5, 5, 1, 1, 4, 3, 4, 3, 4, 3, 4, 3, 4]
 
 
 # ---- helpers ----
@@ -201,73 +229,55 @@ def main() -> int:
         logger.error("No se pudieron crear entidades base. Abortando.")
         return 1
 
-    # 2. Construir el plan de viajes
-    # Estructura: lista de (idx_usuario, idx_conductor, dias_atras)
-    plan_viajes: list[tuple[int, int, int]] = []
-
-    # Coincidencias para caso 5
-    for _ in range(4):  # Juan ↔ Ana Gómez (idx 0 user, idx 0 cond)
-        plan_viajes.append((0, 0, random.randint(0, 20)))
-    for _ in range(3):  # María ↔ Luis Castro (idx 1, idx 1)
-        plan_viajes.append((1, 1, random.randint(0, 20)))
-    for _ in range(2):  # Carlos ↔ Beatriz Silva (idx 2, idx 2)
-        plan_viajes.append((2, 2, random.randint(0, 20)))
-
-    # Resto de viajes (~41), excluyendo Carolina Vega (idx 4 cond) y Roberto Núñez (idx 3)
-    # como conductores recientes
-    conductores_activos = [0, 1, 2]  # Ana, Luis, Beatriz
-    for _ in range(40):
-        idx_user = random.randint(0, len(usuarios) - 1)
-        idx_cond = random.choice(conductores_activos)
-        # Evitar duplicar coincidencias (no queremos más Juan-Ana)
-        if (idx_user, idx_cond) in [(0, 0), (1, 1), (2, 2)]:
-            continue
-        plan_viajes.append((idx_user, idx_cond, random.randint(0, 25)))
-
-    # 1 viaje viejo de Carolina (idx 4 cond): hace 60 días → caso 3 la marca inactiva
-    plan_viajes.append((5, 4, 60))
-    # Roberto (idx 3) no aparece nunca → también inactivo
+    # 2. Plan determinista (constantes de modulo: PLAN_VIAJES / DURACIONES / ...).
+    # Logica del diseno:
+    #  - Caso 5: cada pasajero (Juan/Maria/Carlos) viaja SIEMPRE con el mismo
+    #    conductor -> esas 3 parejas son las unicas con >= 2 viajes.
+    #  - Caso 1: por eso esos 3 lideran el top de resenadores; el relleno usa
+    #    parejas unicas (1 viaje c/u) y no los desplaza.
+    #  - Caso 3: Carolina viaja 1 vez hace 60 dias y Roberto nunca -> inactivos.
+    plan_viajes = PLAN_VIAJES
+    duraciones = DURACIONES
+    distancias = DISTANCIAS
 
     # 3. Ejecutar el plan
     viajes_creados: list[tuple[str, int, int]] = []  # (viaje_id, idx_user, idx_cond)
     ahora = datetime.now(UTC)
-    for idx_user, idx_cond, dias_atras in plan_viajes:
+    for i, (idx_user, idx_cond, dias_atras) in enumerate(plan_viajes):
         usuario = usuarios[idx_user]
         conductor = conductores[idx_cond]
-        # Vehículo del conductor: tomar el primero suyo
+        # Vehiculo del conductor: tomar el primero suyo
         vehiculo = next(v for v in vehiculos if v[1] == conductor[0])
-        duracion = random.randint(10, 45)
-        distancia = round(random.uniform(2.0, 25.0), 1)
-        fecha_fin = ahora - timedelta(days=dias_atras, hours=random.randint(0, 23))
+        fecha_fin = ahora - timedelta(days=dias_atras, hours=(i % 12))
         viaje_id = _crear_viaje_finalizado(
-            usuario, conductor, vehiculo, fecha_fin, duracion, distancia,
+            usuario, conductor, vehiculo, fecha_fin, duraciones[i], distancias[i],
         )
         viajes_creados.append((viaje_id, idx_user, idx_cond))
     logger.info(f"{len(viajes_creados)} viajes creados")
 
-    # 4. Pagos con distribución 30/15/5 (TARJETA/EFECTIVO/BILLETERA)
-    metodos = ["TARJETA"] * 30 + ["EFECTIVO"] * 15 + ["BILLETERA_VIRTUAL"] * 5
-    random.shuffle(metodos)
-    metodos = metodos[:len(viajes_creados)]
-    for (viaje_id, _, _), metodo in zip(viajes_creados, metodos):
-        monto = round(random.uniform(800, 5000), 2)
+    # 4. Pagos DETERMINISTAS (caso 2): BILLETERA_VIRTUAL es el menos usado.
+    #    16 viajes -> 9 TARJETA, 5 EFECTIVO, 2 BILLETERA_VIRTUAL.
+    metodos = METODOS[:len(viajes_creados)]
+    for i, ((viaje_id, _, _), metodo) in enumerate(zip(viajes_creados, metodos)):
+        monto = round(1000 + (i % 8) * 350, 2)
         _crear_pago(viaje_id, monto, metodo)
     logger.info(f"{len(viajes_creados)} pagos creados")
 
-    # 5. Reseñas con distribución de ratings
-    # Caso 7: queremos ~5 con rating 5, ~3 con rating 1, resto 3-4.
-    ratings_pool = [5] * 5 + [1] * 3 + [4] * 20 + [3] * 22
-    random.shuffle(ratings_pool)
+    # 5. Resenas DETERMINISTAS.
+    # Caso 7 (rating 5 o <2): EXACTAMENTE 6 resenas con rating 5 y 4 con rating 1.
+    # Por viaje: una resena U_A_C (rating_user) y una C_A_U (rating_cond).
+    rating_user = RATING_USER
+    rating_cond = RATING_COND
     for i, (viaje_id, idx_user, idx_cond) in enumerate(viajes_creados):
         usuario = usuarios[idx_user]
         conductor = conductores[idx_cond]
-        rating_user = ratings_pool[i % len(ratings_pool)]
-        rating_cond = ratings_pool[(i + 7) % len(ratings_pool)]
+        ru = rating_user[i % len(rating_user)]
+        rc = rating_cond[i % len(rating_cond)]
         try:
-            _crear_resena(viaje_id, usuario, conductor, "U_A_C", rating_user)
-            _crear_resena(viaje_id, usuario, conductor, "C_A_U", rating_cond)
+            _crear_resena(viaje_id, usuario, conductor, "U_A_C", ru)
+            _crear_resena(viaje_id, usuario, conductor, "C_A_U", rc)
         except Exception as e:
-            logger.warning(f"No se pudo reseñar viaje {viaje_id}: {e}")
+            logger.warning(f"No se pudo resenar viaje {viaje_id}: {e}")
     logger.info("Reseñas creadas")
 
     print("\nSeed completo. Resumen:")
@@ -276,15 +286,15 @@ def main() -> int:
     print(f"  Vehículos:    {len(vehiculos)}")
     print(f"  Viajes:       {len(viajes_creados)}")
     print(f"  Pagos:        {len(viajes_creados)}")
-    print(f"  Reseñas:      ~{2 * len(viajes_creados)}")
-    print("\nResultados esperados por caso de uso:")
-    print("  Caso 1 (top 3):           Juan, María y Carlos")
-    print("  Caso 2 (pago menos usado): BILLETERA_VIRTUAL")
-    print("  Caso 3 (inactivos):       Carolina Vega + Roberto Núñez")
-    print("  Caso 4 (tiempo promedio): ~22 min")
-    print("  Caso 5 (coincidencias):   Juan-Ana(4), María-Luis(3), Carlos-Beatriz(2)")
+    print(f"  Reseñas:      {2 * len(viajes_creados)}")
+    print("\nResultados esperados por caso de uso (deterministas con este seed):")
+    print("  Caso 1 (top 3):            Juan Pérez (4), María García (3), Carlos López (2)")
+    print("  Caso 2 (pago menos usado): BILLETERA_VIRTUAL (2 pagos; EFECTIVO 5, TARJETA 9)")
+    print("  Caso 3 (inactivos):        Carolina Vega + Roberto Núñez")
+    print("  Caso 4 (tiempo promedio):  22.00 min")
+    print("  Caso 5 (coincidencias):    Juan-Ana (4), María-Luis (3), Carlos-Beatriz (2)")
     print("  Caso 6 (Toyota patente D): 3 vehículos")
-    print("  Caso 7 (rating extremo):  ~10 reseñas (5 con rating=5, 3 con rating=1)")
+    print("  Caso 7 (rating extremo):   10 reseñas (6 con rating 5, 4 con rating 1)")
     return 0
 
 
