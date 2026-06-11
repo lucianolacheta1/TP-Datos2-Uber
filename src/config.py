@@ -29,6 +29,10 @@ class Settings:
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
     # Logging
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    # Menu de administracion (opcional): si esta vacia, el menu admin queda
+    # deshabilitado. No es una credencial de base de datos, es un candado
+    # local para que un usuario comun no ejecute acciones destructivas.
+    ADMIN_KEY: str = os.getenv("ADMIN_KEY", "")
 
 
 settings = Settings()

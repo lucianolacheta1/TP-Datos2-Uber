@@ -1,8 +1,14 @@
-"""Submenu de administracion: health check, reconciliacion, outbox, reset."""
+"""Submenu de administracion: health check, reconciliacion, outbox, reset.
+
+Protegido con una clave local (ADMIN_KEY en .env): un usuario comun del menu
+no debe poder ejecutar acciones destructivas como limpiar las bases.
+"""
+import getpass
 import threading
 
+from src.config import settings
 from src.db import postgres, mongo, cassandra, neo4j_db, redis_db
-from src.services import reconciliacion_service
+from src.services import reconciliacion_service, vehiculo_service
 from src.utils import outbox
 from src.menu import formato
 
@@ -10,8 +16,31 @@ from src.menu import formato
 _sim_thread: threading.Thread | None = None
 _sim_event = threading.Event()
 
+_MAX_INTENTOS_CLAVE = 3
+
+
+def _autenticar_admin() -> bool:
+    """Pide la clave de administrador. Sin ADMIN_KEY configurada, se deniega."""
+    if not settings.ADMIN_KEY:
+        formato.error(
+            "El menú de administración está deshabilitado: "
+            "configurá ADMIN_KEY en el archivo .env para habilitarlo."
+        )
+        formato.pausa()
+        return False
+    for _ in range(_MAX_INTENTOS_CLAVE):
+        clave = getpass.getpass("Clave de administrador: ")
+        if clave == settings.ADMIN_KEY:
+            return True
+        formato.error("Clave incorrecta.")
+    formato.error("Demasiados intentos fallidos.")
+    formato.pausa()
+    return False
+
 
 def loop() -> None:
+    if not _autenticar_admin():
+        return
     while True:
         formato.subtitulo("Administración")
         print("1. Verificar conexiones a las 5 bases")
@@ -92,16 +121,27 @@ def _iniciar_simulador() -> None:
         formato.error("El simulador ya está corriendo.")
         formato.pausa()
         return
-    vehiculo_id = formato.pedir_input("ID del vehículo a simular")
+    vehiculos = vehiculo_service.listar_todos()
+    if not vehiculos:
+        formato.error("No hay vehículos registrados para simular.")
+        formato.pausa()
+        return
+    print("\nVehículos registrados:")
+    vehiculo = formato.elegir_de_lista(
+        vehiculos,
+        lambda v: f"{v['marca']} {v['modelo']} — patente {v['placa']}",
+    )
+    if vehiculo is None:
+        return
     from scripts import simulador_gps
     _sim_event.set()
     _sim_thread = threading.Thread(
         target=simulador_gps.correr,
-        args=(vehiculo_id, 2, _sim_event),
+        args=(vehiculo["id"], 2, _sim_event),
         daemon=True, name="SimuladorGPS",
     )
     _sim_thread.start()
-    formato.exito(f"Simulador GPS arrancado para {vehiculo_id} (cada 2s).")
+    formato.exito(f"Simulador GPS arrancado para {vehiculo['placa']} (cada 2s).")
     formato.pausa()
 
 
@@ -119,7 +159,8 @@ def _detener_simulador() -> None:
 
 def _reset_dbs() -> None:
     formato.error("ATENCIÓN: esto borra TODOS los datos de las 5 bases.")
-    if not formato.confirmar('Escribí "s" para confirmar'):
+    confirmacion = input('Escribí exactamente "BORRAR" para confirmar: ').strip()
+    if confirmacion != "BORRAR":
         formato.info("Cancelado.")
         formato.pausa()
         return

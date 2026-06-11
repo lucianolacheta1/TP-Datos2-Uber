@@ -71,6 +71,25 @@ def solicitar(usuario_id: str, conductor_id: str, vehiculo_id: str,
     return viaje_repo.crear(doc)
 
 
+# ----------------- lecturas para el menu -----------------
+# El menu no puede llamar a repositories directamente (regla de capas),
+# por eso el service expone estos listados de solo lectura.
+
+def obtener(viaje_id: str) -> dict | None:
+    """Devuelve el viaje por id, o None si no existe."""
+    return viaje_repo.get_by_id(viaje_id)
+
+
+def listar_de_conductor(conductor_id: str, estado: str) -> list[dict]:
+    """Viajes de un conductor filtrados por estado."""
+    return viaje_repo.listar_por_conductor(conductor_id, estado)
+
+
+def listar_de_usuario(usuario_id: str, estado: str) -> list[dict]:
+    """Viajes de un usuario filtrados por estado."""
+    return viaje_repo.listar_por_usuario(usuario_id, estado)
+
+
 # ----------------- iniciar -----------------
 
 def iniciar(viaje_id: str) -> bool:
