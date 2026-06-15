@@ -1,7 +1,13 @@
 """Neo4j (Aura) connection — singleton driver."""
+import logging
+
 from neo4j import GraphDatabase, Driver
 from src.config import settings
 from src.utils.logger import logger
+
+# El driver de Neo4j avisa por cada query con producto cartesiano (MANEJA / VIAJO_CON).
+# Son notificaciones de performance esperadas, no errores: silenciamos el ruido.
+logging.getLogger("neo4j.notifications").setLevel(logging.ERROR)
 
 _driver: Driver | None = None
 
