@@ -1,0 +1,55 @@
+# Testeo de los 7 casos de uso con tiempos de ejecucion.
+# Llama a cada caso directamente, mide cuanto tarda y muestra el resultado.
+# Demuestra que las 5 bases responden y la eficiencia de cada consulta.
+
+import time
+from src.config import validate
+from src.casos_uso import (
+    caso_01_top_resenadores,
+    caso_02_metodo_pago,
+    caso_03_conductores_inactivos,
+    caso_04_promedio_viajes,
+    caso_05_coincidencias,
+    caso_06_toyota_patente_d,
+    caso_07_resenas_extremas,
+)
+
+print("\nValidando .env...", end=" ")
+validate()
+print("OK")
+
+casos = [
+    ("1. Top 3 resenadores             (Mongo + Redis)",      caso_01_top_resenadores.ejecutar),
+    ("2. Metodo de pago menos usado    (Mongo)",              caso_02_metodo_pago.ejecutar),
+    ("3. Conductores inactivos         (Cassandra + Postgres)", caso_03_conductores_inactivos.ejecutar),
+    ("4. Tiempo promedio de viajes     (Cassandra + Redis)",  caso_04_promedio_viajes.ejecutar),
+    ("5. Pasajero-conductor (+1 viaje) (Neo4j)",              caso_05_coincidencias.ejecutar),
+    ("6. Toyota con patente en 'D'     (Neo4j)",              caso_06_toyota_patente_d.ejecutar),
+    ("7. Resenas extremas (5 o <2)     (Mongo)",              caso_07_resenas_extremas.ejecutar),
+]
+
+print("\n" + "=" * 62)
+print("  TESTEO DE LOS 7 CASOS DE USO  —  con tiempos de ejecucion")
+print("=" * 62)
+
+total = 0.0
+for titulo, funcion in casos:
+    inicio = time.perf_counter()
+    resultado = funcion()
+    duracion = time.perf_counter() - inicio
+    total += duracion
+
+    if isinstance(resultado, list):
+        resumen = f"{len(resultado)} resultado(s)"
+    elif resultado is None:
+        resumen = "(sin resultado)"
+    else:
+        resumen = str(resultado)
+
+    print(f"\n{titulo}")
+    print(f"   Resultado: {resumen}")
+    print(f"   Tiempo:    {duracion:.4f} s")
+
+print("\n" + "=" * 62)
+print(f"  TIEMPO TOTAL DE LAS 7 CONSULTAS: {total:.4f} s")
+print("=" * 62 + "\n")
