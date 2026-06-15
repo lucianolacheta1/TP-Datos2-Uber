@@ -73,3 +73,27 @@ def listar_finalizados() -> list[dict]:
         d["_id"] = str(d["_id"])
         result.append(d)
     return result
+
+
+def listar_por_conductor(conductor_id: str, estado: str) -> list[dict]:
+    """Viajes de un conductor en un estado dado, más recientes primero."""
+    docs = _coll().find(
+        {"conductor_id": conductor_id, "estado": estado}
+    ).sort("ts_solicitud", -1)
+    result = []
+    for d in docs:
+        d["_id"] = str(d["_id"])
+        result.append(d)
+    return result
+
+
+def listar_por_usuario(usuario_id: str, estado: str) -> list[dict]:
+    """Viajes de un usuario en un estado dado, más recientes primero."""
+    docs = _coll().find(
+        {"usuario_id": usuario_id, "estado": estado}
+    ).sort("ts_solicitud", -1)
+    result = []
+    for d in docs:
+        d["_id"] = str(d["_id"])
+        result.append(d)
+    return result

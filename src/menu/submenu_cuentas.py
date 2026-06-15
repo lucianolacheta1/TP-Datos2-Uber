@@ -1,4 +1,6 @@
 """Submenu de gestion de cuentas: registro, login, logout."""
+import getpass
+
 from src.services import auth_service
 from src.utils.errors import CredencialesInvalidas
 from src.menu import formato
@@ -38,8 +40,8 @@ def _imprimir_estado_sesion(sesion: dict) -> None:
 
 
 def _registrar_usuario() -> None:
-    email = formato.pedir_input("Email")
-    password = formato.pedir_input("Password")
+    email = formato.pedir_input("Email").lower()
+    password = getpass.getpass("Password: ")
     nombre = formato.pedir_input("Nombre completo")
     telefono = formato.pedir_input("Teléfono (opcional)", default="")
     try:
@@ -51,8 +53,8 @@ def _registrar_usuario() -> None:
 
 
 def _registrar_conductor() -> None:
-    email = formato.pedir_input("Email")
-    password = formato.pedir_input("Password")
+    email = formato.pedir_input("Email").lower()
+    password = getpass.getpass("Password: ")
     nombre = formato.pedir_input("Nombre completo")
     licencia = formato.pedir_input("Nro. de licencia")
     telefono = formato.pedir_input("Teléfono (opcional)", default="")
@@ -69,9 +71,9 @@ def _login(sesion: dict) -> None:
         formato.error("Ya hay una sesión activa. Cerrá sesión primero.")
         formato.pausa()
         return
-    email = formato.pedir_input("Email")
-    password = formato.pedir_input("Password")
-    tipo = formato.pedir_input("Tipo de cuenta (USUARIO/CONDUCTOR)", default="USUARIO")
+    email = formato.pedir_input("Email").lower()
+    password = getpass.getpass("Password: ")
+    tipo = formato.pedir_input("Tipo de cuenta (USUARIO/CONDUCTOR)", default="USUARIO").upper()
     if tipo not in ("USUARIO", "CONDUCTOR"):
         formato.error("Tipo de cuenta inválido.")
         formato.pausa()
