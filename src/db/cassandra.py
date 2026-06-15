@@ -1,15 +1,8 @@
 """Cassandra (DataStax Astra) connection — singleton."""
-import logging
-
 from cassandra.cluster import Cluster, Session
 from cassandra.auth import PlainTextAuthProvider
 from src.config import settings
-from src.utils.logger import logger
-
-# El driver de Cassandra emite muchos WARNING/INFO ruidosos en cada arranque
-# (downgrade de protocolo, datacenter en uso, "USE keyspace con prepared statements").
-# No nos interesan: silenciamos todo lo que no sea un error real del driver.
-logging.getLogger("cassandra").setLevel(logging.ERROR)
+from src.utils.logger import logger  # configura y silencia loggers ruidosos al importar
 
 _session: Session | None = None
 
