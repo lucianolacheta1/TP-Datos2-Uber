@@ -15,9 +15,8 @@ Por eso ejercita la MISMA logica que el menu llama por debajo (los services).
 Los datos que crea son NEUTROS (no alteran los 7 casos): pareja unica de 1 viaje,
 duracion 22, vehiculo no-Toyota, pago no-BILLETERA, resena rating 4.
 
-Uso (desde cualquier carpeta):
-    python -m scripts.test_automatico
-    # o:  python scripts/test_automatico.py
+Uso (desde la raiz del repo):
+    python test_automatico.py
 """
 import os
 import sys
@@ -25,7 +24,7 @@ import time
 import traceback
 
 # Permite correrlo como script suelto (agrega la raiz del proyecto al path)
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.config import validate
 from src.db import postgres, mongo, cassandra, neo4j_db, redis_db
@@ -55,22 +54,21 @@ def check(nombre: str, cond: bool, detalle: str = "") -> None:
 
 def _estado_conexiones() -> None:
     """[0] Verifica las 5 conexiones (igual que el health-check del menu admin)."""
+    global _fallos
     print("[0] Estado de las conexiones a las bases")
     bases = [
-        ("Postgres  (Neon)",   postgres.check),
-        ("MongoDB   (Atlas)",  mongo.check),
-        ("Cassandra (Astra)",  cassandra.check),
-        ("Neo4j     (Aura)",   neo4j_db.check),
-        ("Redis     (Cloud)",  redis_db.check),
+        ("Postgres  (Neon)",       postgres.check),
+        ("MongoDB   (Atlas)",      mongo.check),
+        ("Cassandra (Astra)",      cassandra.check),
+        ("Neo4j     (Aura)",       neo4j_db.check),
+        ("Redis     (Redis Cloud)", redis_db.check),
     ]
     for nombre, fn in bases:
         try:
             ok = fn()
         except Exception as e:
-            ok = False
-            print(f"  [FALLO] {nombre}: {e}")
-            global _fallos
             _fallos += 1
+            print(f"  [FALLO] {nombre}: {e}")
             continue
         check(f"{nombre}: conexion", ok)
 
