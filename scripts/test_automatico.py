@@ -144,32 +144,34 @@ def main() -> int:
 
     # ---------- [B] 7 casos de uso (con cronometraje) ----------
     print("\n[B] Los 7 casos de uso")
-    for k in ("top3_resenadores", "viajes_promedio"):
-        try:
-            cache_repo.invalidar(k)  # recalcular de verdad, no leer cache
-        except Exception:
-            pass
 
-    tiempos: list[tuple[str, float]] = []
+    tiempos: list[tuple[str, float]] = []            # (nombre, ms) -> total de [C]
+    cache_demo: list[tuple[str, float, float]] = []  # (nombre, ms_frio, ms_caliente) -> [D]
 
-    def cronometrar(nombre: str, fn):
-        """Ejecuta fn() midiendo el tiempo y lo guarda en `tiempos`. Devuelve el resultado."""
+    def medir(fn):
+        """Ejecuta fn() y devuelve (resultado, ms)."""
         t0 = time.perf_counter()
         res = fn()
-        ms = (time.perf_counter() - t0) * 1000
-        tiempos.append((nombre, ms))
-        return res, ms
+        return res, (time.perf_counter() - t0) * 1000
 
     try:
-        top, ms = cronometrar("Caso 1 (Mongo+Redis)", caso_01_top_resenadores.ejecutar)
-        print(f"  Caso 1 top3: {[(r.get('nombre'), r.get('cantidad')) for r in top]}  [{ms:.1f} ms]")
+        # Caso 1 (cacheado): medimos FRIO (cache MISS -> Mongo) y CALIENTE (HIT -> Redis)
+        cache_repo.invalidar("top3_resenadores")
+        top, ms_frio = medir(caso_01_top_resenadores.ejecutar)   # MISS -> recalcula en Mongo
+        _,   ms_cal  = medir(caso_01_top_resenadores.ejecutar)   # HIT  -> sirve de Redis
+        tiempos.append(("Caso 1 (Mongo+Redis)", ms_frio))
+        cache_demo.append(("Caso 1 (Mongo -> Redis)", ms_frio, ms_cal))
+        print(f"  Caso 1 top3: {[(r.get('nombre'), r.get('cantidad')) for r in top]}"
+              f"  [MISS {ms_frio:.1f} ms -> HIT {ms_cal:.1f} ms]")
         check("Caso 1: lider = Juan Perez", bool(top) and top[0].get("nombre") == "Juan Pérez")
 
-        m, ms = cronometrar("Caso 2 (Mongo)", caso_02_metodo_pago.ejecutar)
+        m, ms = medir(caso_02_metodo_pago.ejecutar)
+        tiempos.append(("Caso 2 (Mongo)", ms))
         print(f"  Caso 2: {m}  [{ms:.1f} ms]")
         check("Caso 2: BILLETERA_VIRTUAL", m == "BILLETERA_VIRTUAL")
 
-        inact, ms = cronometrar("Caso 3 (Cassandra+Postgres)", caso_03_conductores_inactivos.ejecutar)
+        inact, ms = medir(caso_03_conductores_inactivos.ejecutar)
+        tiempos.append(("Caso 3 (Cassandra+Postgres)", ms))
         nombres_in = [x.get("nombre") for x in inact]
         print(f"  Caso 3 inactivos: {nombres_in}  [{ms:.1f} ms]")
         check("Caso 3: incluye Carolina y Roberto",
@@ -177,20 +179,28 @@ def main() -> int:
               and any("Roberto" in (n or "") for n in nombres_in),
               "(puede traer ruido de pruebas manuales)")
 
-        prom, ms = cronometrar("Caso 4 (Cassandra+Redis)", caso_04_promedio_viajes.ejecutar)
-        print(f"  Caso 4: {prom:.2f} min  [{ms:.1f} ms]")
+        # Caso 4 (cacheado): tambien FRIO (MISS -> Cassandra) vs CALIENTE (HIT -> Redis)
+        cache_repo.invalidar("viajes_promedio")
+        prom, ms_frio = medir(caso_04_promedio_viajes.ejecutar)  # MISS -> recalcula en Cassandra
+        _,    ms_cal  = medir(caso_04_promedio_viajes.ejecutar)  # HIT  -> sirve de Redis
+        tiempos.append(("Caso 4 (Cassandra+Redis)", ms_frio))
+        cache_demo.append(("Caso 4 (Cassandra -> Redis)", ms_frio, ms_cal))
+        print(f"  Caso 4: {prom:.2f} min  [MISS {ms_frio:.1f} ms -> HIT {ms_cal:.1f} ms]")
         check("Caso 4: 22.00 min", abs(prom - 22.0) < 0.01)
 
-        co, ms = cronometrar("Caso 5 (Neo4j)", caso_05_coincidencias.ejecutar)
+        co, ms = medir(caso_05_coincidencias.ejecutar)
+        tiempos.append(("Caso 5 (Neo4j)", ms))
         print(f"  Caso 5: {[(r.get('pasajero'), r.get('conductor'), r.get('viajes')) for r in co]}  [{ms:.1f} ms]")
         check("Caso 5: 3 parejas con >=2 viajes", len(co) == 3)
 
-        c6, ms = cronometrar("Caso 6 (Neo4j)", caso_06_toyota_patente_d.ejecutar)
+        c6, ms = medir(caso_06_toyota_patente_d.ejecutar)
+        tiempos.append(("Caso 6 (Neo4j)", ms))
         print(f"  Caso 6: {c6}  [{ms:.1f} ms]")
         check("Caso 6: >=3 Toyota patente D (baseline del seed)", c6 >= 3,
               f"(hay {c6}; el seed deja 3, el resto es ruido de pruebas manuales)")
 
-        c7, ms = cronometrar("Caso 7 (Mongo)", caso_07_resenas_extremas.ejecutar)
+        c7, ms = medir(caso_07_resenas_extremas.ejecutar)
+        tiempos.append(("Caso 7 (Mongo)", ms))
         print(f"  Caso 7: {len(c7)} resenas extremas  [{ms:.1f} ms]")
         check("Caso 7: >=10 resenas extremas (baseline del seed)", len(c7) >= 10,
               f"(hay {len(c7)}; el seed deja 10, el resto es ruido de pruebas manuales)")
@@ -201,14 +211,21 @@ def main() -> int:
 
     # ---------- [C] Resumen de tiempos ----------
     if tiempos:
-        print("\n[C] Tiempos de respuesta (conexiones ya abiertas)")
+        print("\n[C] Tiempos de respuesta (1a llamada de cada caso)")
         for nombre, ms in tiempos:
             print(f"  {nombre:<28} {ms:8.1f} ms")
         total = sum(ms for _, ms in tiempos)
         print(f"  {'-' * 28} {'-' * 11}")
         print(f"  {'TOTAL (' + str(len(tiempos)) + ' consultas)':<28} {total:8.1f} ms")
-        print("  Nota: la 1a conexion ([0]) incluye handshake/TLS; con la conexion")
-        print("        ya abierta, cada consulta resuelve en centesimas/decimas de seg.")
+
+    # ---------- [D] Efecto del cache de Redis ----------
+    if cache_demo:
+        print("\n[D] Efecto del cache de Redis (1a llamada vs 2a)")
+        for nombre, frio, cal in cache_demo:
+            factor = (frio / cal) if cal > 0 else 0.0
+            print(f"  {nombre:<26} MISS {frio:8.1f} ms  ->  HIT {cal:8.1f} ms   ({factor:.0f}x mas rapido)")
+        print("  La 1a llamada recalcula en Mongo/Cassandra y guarda en Redis (TTL 5 min);")
+        print("  la 2a la sirve Redis desde cache. Por eso la consulta repetida vuela.")
 
     print(f"\n=== RESUMEN: {_oks} OK, {_fallos} FALLO ===")
     return 1 if _fallos else 0
