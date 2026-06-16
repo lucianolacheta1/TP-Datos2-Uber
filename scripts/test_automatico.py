@@ -1,9 +1,10 @@
 """Test automatico end-to-end del sistema (reemplaza el test_automatico.py original).
 
 Devuelve, en una sola corrida:
-  [0] Estado de las conexiones a las 5 bases (Postgres, Mongo, Cassandra, Neo4j, Redis).
+  [0] Estado + tiempo de conexion a las 5 bases (Postgres, Mongo, Cassandra, Neo4j, Redis).
   [A] Flujo de negocio completo (registro -> viaje -> pago -> resena) via services.
   [B] Resultado de los 7 casos de uso.
+  [C] Tiempos de respuesta cronometrados de cada caso + total de las 7 consultas.
 
 POR QUE NO se maneja el menu por stdin (como el script original):
   - login/registro/admin usan getpass(): lee del TERMINAL, no de stdin -> no se
@@ -16,7 +17,8 @@ Los datos que crea son NEUTROS (no alteran los 7 casos): pareja unica de 1 viaje
 duracion 22, vehiculo no-Toyota, pago no-BILLETERA, resena rating 4.
 
 Uso (desde la raiz del repo):
-    python test_automatico.py
+    python -m scripts.test_automatico
+    # o:  python scripts/test_automatico.py
 """
 import os
 import sys
@@ -24,7 +26,7 @@ import time
 import traceback
 
 # Permite correrlo como script suelto (agrega la raiz del proyecto al path)
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.config import validate
 from src.db import postgres, mongo, cassandra, neo4j_db, redis_db
@@ -53,24 +55,31 @@ def check(nombre: str, cond: bool, detalle: str = "") -> None:
 
 
 def _estado_conexiones() -> None:
-    """[0] Verifica las 5 conexiones (igual que el health-check del menu admin)."""
+    """[0] Verifica las 5 conexiones y cronometra cada una.
+
+    La primera conexion a cada base incluye el handshake (abrir canal, autenticar,
+    negociar TLS): por eso Cassandra suele ser la mas lenta aca. Las consultas
+    posteriores (seccion [C]) reusan la conexion abierta y son mucho mas rapidas.
+    """
     global _fallos
-    print("[0] Estado de las conexiones a las bases")
+    print("[0] Estado + tiempo de conexion a las bases")
     bases = [
-        ("Postgres  (Neon)",       postgres.check),
-        ("MongoDB   (Atlas)",      mongo.check),
-        ("Cassandra (Astra)",      cassandra.check),
-        ("Neo4j     (Aura)",       neo4j_db.check),
+        ("Postgres  (Neon)",        postgres.check),
+        ("MongoDB   (Atlas)",       mongo.check),
+        ("Cassandra (Astra)",       cassandra.check),
+        ("Neo4j     (Aura)",        neo4j_db.check),
         ("Redis     (Redis Cloud)", redis_db.check),
     ]
     for nombre, fn in bases:
         try:
+            t0 = time.perf_counter()
             ok = fn()
+            ms = (time.perf_counter() - t0) * 1000
         except Exception as e:
             _fallos += 1
             print(f"  [FALLO] {nombre}: {e}")
             continue
-        check(f"{nombre}: conexion", ok)
+        check(f"{nombre}: conexion", ok, f"({ms:7.1f} ms)")
 
 
 def main() -> int:
@@ -133,51 +142,73 @@ def main() -> int:
         print(f"  [FALLO] excepcion en el flujo: {e}")
         traceback.print_exc()
 
-    # ---------- [B] 7 casos de uso ----------
+    # ---------- [B] 7 casos de uso (con cronometraje) ----------
     print("\n[B] Los 7 casos de uso")
     for k in ("top3_resenadores", "viajes_promedio"):
         try:
-            cache_repo.invalidar(k)  # leer la verdad de las bases, no cache
+            cache_repo.invalidar(k)  # recalcular de verdad, no leer cache
         except Exception:
             pass
 
+    tiempos: list[tuple[str, float]] = []
+
+    def cronometrar(nombre: str, fn):
+        """Ejecuta fn() midiendo el tiempo y lo guarda en `tiempos`. Devuelve el resultado."""
+        t0 = time.perf_counter()
+        res = fn()
+        ms = (time.perf_counter() - t0) * 1000
+        tiempos.append((nombre, ms))
+        return res, ms
+
     try:
-        top = caso_01_top_resenadores.ejecutar()
-        print(f"  Caso 1 top3: {[(r.get('nombre'), r.get('cantidad')) for r in top]}")
+        top, ms = cronometrar("Caso 1 (Mongo+Redis)", caso_01_top_resenadores.ejecutar)
+        print(f"  Caso 1 top3: {[(r.get('nombre'), r.get('cantidad')) for r in top]}  [{ms:.1f} ms]")
         check("Caso 1: lider = Juan Perez", bool(top) and top[0].get("nombre") == "Juan Pérez")
 
-        m = caso_02_metodo_pago.ejecutar()
-        print(f"  Caso 2: {m}")
+        m, ms = cronometrar("Caso 2 (Mongo)", caso_02_metodo_pago.ejecutar)
+        print(f"  Caso 2: {m}  [{ms:.1f} ms]")
         check("Caso 2: BILLETERA_VIRTUAL", m == "BILLETERA_VIRTUAL")
 
-        inact = caso_03_conductores_inactivos.ejecutar()
+        inact, ms = cronometrar("Caso 3 (Cassandra+Postgres)", caso_03_conductores_inactivos.ejecutar)
         nombres_in = [x.get("nombre") for x in inact]
-        print(f"  Caso 3 inactivos: {nombres_in}")
+        print(f"  Caso 3 inactivos: {nombres_in}  [{ms:.1f} ms]")
         check("Caso 3: incluye Carolina y Roberto",
               any("Carolina" in (n or "") for n in nombres_in)
               and any("Roberto" in (n or "") for n in nombres_in),
               "(puede traer ruido de pruebas manuales)")
 
-        prom = caso_04_promedio_viajes.ejecutar()
-        print(f"  Caso 4: {prom:.2f} min")
+        prom, ms = cronometrar("Caso 4 (Cassandra+Redis)", caso_04_promedio_viajes.ejecutar)
+        print(f"  Caso 4: {prom:.2f} min  [{ms:.1f} ms]")
         check("Caso 4: 22.00 min", abs(prom - 22.0) < 0.01)
 
-        co = caso_05_coincidencias.ejecutar()
-        print(f"  Caso 5: {[(r.get('pasajero'), r.get('conductor'), r.get('viajes')) for r in co]}")
+        co, ms = cronometrar("Caso 5 (Neo4j)", caso_05_coincidencias.ejecutar)
+        print(f"  Caso 5: {[(r.get('pasajero'), r.get('conductor'), r.get('viajes')) for r in co]}  [{ms:.1f} ms]")
         check("Caso 5: 3 parejas con >=2 viajes", len(co) == 3)
 
-        c6 = caso_06_toyota_patente_d.ejecutar()
-        print(f"  Caso 6: {c6}")
-        check("Caso 6: 3 Toyota patente D", c6 == 3)
+        c6, ms = cronometrar("Caso 6 (Neo4j)", caso_06_toyota_patente_d.ejecutar)
+        print(f"  Caso 6: {c6}  [{ms:.1f} ms]")
+        check("Caso 6: >=3 Toyota patente D (baseline del seed)", c6 >= 3,
+              f"(hay {c6}; el seed deja 3, el resto es ruido de pruebas manuales)")
 
-        c7 = caso_07_resenas_extremas.ejecutar()
-        print(f"  Caso 7: {len(c7)} resenas extremas")
-        check("Caso 7: 10 resenas extremas", len(c7) == 10,
-              "(puede variar si hubo pruebas manuales)")
+        c7, ms = cronometrar("Caso 7 (Mongo)", caso_07_resenas_extremas.ejecutar)
+        print(f"  Caso 7: {len(c7)} resenas extremas  [{ms:.1f} ms]")
+        check("Caso 7: >=10 resenas extremas (baseline del seed)", len(c7) >= 10,
+              f"(hay {len(c7)}; el seed deja 10, el resto es ruido de pruebas manuales)")
     except Exception as e:
         _fallos += 1
         print(f"  [FALLO] excepcion en los casos: {e}")
         traceback.print_exc()
+
+    # ---------- [C] Resumen de tiempos ----------
+    if tiempos:
+        print("\n[C] Tiempos de respuesta (conexiones ya abiertas)")
+        for nombre, ms in tiempos:
+            print(f"  {nombre:<28} {ms:8.1f} ms")
+        total = sum(ms for _, ms in tiempos)
+        print(f"  {'-' * 28} {'-' * 11}")
+        print(f"  {'TOTAL (' + str(len(tiempos)) + ' consultas)':<28} {total:8.1f} ms")
+        print("  Nota: la 1a conexion ([0]) incluye handshake/TLS; con la conexion")
+        print("        ya abierta, cada consulta resuelve en centesimas/decimas de seg.")
 
     print(f"\n=== RESUMEN: {_oks} OK, {_fallos} FALLO ===")
     return 1 if _fallos else 0
